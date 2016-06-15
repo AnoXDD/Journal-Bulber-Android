@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Bulber2</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="action_settings">Settings</string>
+    <string name="bulb_onedrive_filename_suffix">.txt</string>
+    <string name="bulb_folder_id">bulbFolderID</string>
+    <string name="bulb_pushed">Bulb pushed</string>
+    <string name="bulb_push_failed">Failed to push the bulb</string>
+    <string name="action_settings">Hi</string>
 </resources>

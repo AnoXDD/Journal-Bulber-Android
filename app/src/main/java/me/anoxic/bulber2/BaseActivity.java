@@ -2,22 +2,18 @@ package me.anoxic.bulber2;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.util.Log;
-import android.util.LruCache;
+import android.support.design.widget.Snackbar;
 import android.widget.Toast;
 
 import com.onedrive.sdk.authentication.MSAAuthenticator;
 import com.onedrive.sdk.concurrency.ICallback;
+import com.onedrive.sdk.concurrency.IProgressCallback;
 import com.onedrive.sdk.core.ClientException;
 import com.onedrive.sdk.core.DefaultClientConfig;
 import com.onedrive.sdk.core.IClientConfig;
-import com.onedrive.sdk.extensions.IItemRequestBuilder;
 import com.onedrive.sdk.extensions.IOneDriveClient;
 import com.onedrive.sdk.extensions.Item;
 import com.onedrive.sdk.extensions.OneDriveClient;
@@ -37,7 +33,7 @@ public class BaseActivity extends Activity {
      */
     private ConnectivityManager mConnectivityManager;
 
-    private StorageManager storageManager;
+    private StorageManager storageManager = new StorageManager();
 
     /**
      * What to do when the application starts
@@ -46,6 +42,10 @@ public class BaseActivity extends Activity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        storageManager.setSharedPreferences(sharedPreferences)
+                .setContext(getApplicationContext());
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     }
@@ -128,13 +128,8 @@ public class BaseActivity extends Activity {
                     .get(new ICallback<Item>() {
                         @Override
                         public void success(Item item) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Get bulb folder: " + item.toString(),
-                                    Toast.LENGTH_LONG)
-                                    .show();
-
                             // Store the data
-                            storageManager.setBulbFolderID(item.toString());
+                            storageManager.setBulbFolderID(item.id);
 
                             publishBulbOnFolder(bulb);
                         }
@@ -154,11 +149,43 @@ public class BaseActivity extends Activity {
     /**
      * Publish the bulb to the bulb folder
      *
-     * @param bulb
+     * @param bulb the bulb content
      * @require bulb folder ID is valid (in `StorageManager`)
      */
     private void publishBulbOnFolder(final String bulb) {
-        String id = StorageManager.getBulbFolderID();
+        String id = storageManager.getBulbFolderID();
 
+        final String filename = Timer.getCurrentBulbFilename();
+        final byte[] fileContents = bulb.getBytes();
+        final IProgressCallback<Item> callback = new IProgressCallback<Item>() {
+            @Override
+            public void progress(long current, long max) {
+
+            }
+
+            public void success(final Item item) {
+                Snackbar.make(getCurrentFocus(),
+                        getString(R.string.bulb_pushed),
+                        Snackbar.LENGTH_LONG)
+                        .show();
+            }
+
+            @Override
+            public void failure(ClientException ex) {
+                Snackbar.make(getCurrentFocus(),
+                        getString(R.string.bulb_push_failed),
+                        Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        };
+
+        this.getOneDriveClient()
+                .getDrive()
+                .getItems(id)
+                .getChildren()
+                .byId(filename)
+                .getContent()
+                .buildRequest()
+                .put(fileContents, callback);
     }
 }
