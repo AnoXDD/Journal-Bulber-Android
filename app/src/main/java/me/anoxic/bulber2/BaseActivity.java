@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.onedrive.sdk.authentication.MSAAuthenticator;
@@ -168,6 +169,10 @@ public class BaseActivity extends Activity {
                         getString(R.string.bulb_pushed),
                         Snackbar.LENGTH_LONG)
                         .show();
+
+                // Clear the field
+                final EditText editText = (EditText) findViewById(R.id.bulbContent);
+                editText.setText("");
             }
 
             @Override

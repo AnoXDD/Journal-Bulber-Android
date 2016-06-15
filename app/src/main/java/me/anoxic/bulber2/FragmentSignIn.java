@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,13 +78,35 @@ public class FragmentSignIn extends Fragment {
         });
     }
 
-    private void enableSignInButton(View view) {
+    private void enableSignInButton(final View view) {
         final Button signin = (Button) view.findViewById(R.id.signin);
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 challengeSignIn(signin, null);
+            }
+        });
+
+        // Enable/disable the button based on the activities of edittext
+        final EditText editText = (EditText) view.findViewById(R.id.bulbContent);
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                final Button button = (Button) view.findViewById(R.id.push);
+
+                button.setEnabled(s.length() != 0);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
     }
