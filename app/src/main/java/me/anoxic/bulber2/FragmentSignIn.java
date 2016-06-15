@@ -2,6 +2,8 @@ package me.anoxic.bulber2;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +12,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.onedrive.sdk.concurrency.ICallback;
 
@@ -57,9 +58,10 @@ public class FragmentSignIn extends Fragment {
         });
     }
 
-    private void enablePushButton(View view) {
+    private void enablePushButton(final View view) {
         final Button push = (Button) view.findViewById(R.id.push);
         final EditText bulbContent = (EditText) view.findViewById(R.id.bulbContent);
+        final Button signin = (Button) view.findViewById(R.id.signin);
 
         push.setOnClickListener(new View.OnClickListener() {
 
@@ -68,11 +70,8 @@ public class FragmentSignIn extends Fragment {
                 // Get the content
                 String bulb = bulbContent.getText()
                         .toString();
-                Toast.makeText(getContext(), "Bulb will be pushed: " + bulb, Toast.LENGTH_LONG)
-                        .show();
 
-                final BaseActivity app = (BaseActivity) getActivity();
-
+                challengeSignIn(signin, bulb);
             }
         });
     }
@@ -83,30 +82,49 @@ public class FragmentSignIn extends Fragment {
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                signin.setEnabled(false);
-                final BaseActivity app = (BaseActivity) getActivity();
-                final ICallback<Void> serviceCreated = new DefaultCallback<Void>(getActivity()) {
-                    @Override
-                    public void success(final Void result) {
-                        navigateToRoot();
-                        signin.setEnabled(true);
-                    }
-                };
-
-                try {
-                    app.getOneDriveClient();
-                    navigateToRoot();
-                    signin.setEnabled(true);
-                } catch (final UnsupportedOperationException ignored) {
-                    app.createOneDriveClient(getActivity(), serviceCreated);
-                }
+                challengeSignIn(signin, null);
             }
         });
     }
 
-    private void navigateToRoot() {
-        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_LONG)
+    /**
+     * Challenges the server for signing in, after which publishing a bulb
+     *
+     * @param signin The button for signing in
+     * @param bulb   The content of bulb. Leave it `null` to not publish anything
+     */
+    private void challengeSignIn(final Button signin, final String bulb) {
+        signin.setEnabled(false);
+        final BaseActivity app = (BaseActivity) getActivity();
+        final ICallback<Void> serviceCreated = new DefaultCallback<Void>(getActivity()) {
+            @Override
+            public void success(final Void result) {
+                onTokenRefreshed(bulb);
+                signin.setEnabled(true);
+            }
+        };
+
+        try {
+            app.getOneDriveClient();
+            onTokenRefreshed(bulb);
+            signin.setEnabled(true);
+        } catch (final UnsupportedOperationException ignored) {
+            app.createOneDriveClient(getActivity(), serviceCreated);
+        }
+    }
+
+    /**
+     * Do something on token is refreshed
+     *
+     * @param bulb The content of bulb. Leave it `null` to not publish anything
+     */
+    private void onTokenRefreshed(final String bulb) {
+        //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)                .show();
+        Toast.makeText(getContext(), "Bulb will be pushed: " + bulb, Toast.LENGTH_LONG)
                 .show();
+
+        final BaseActivity app = (BaseActivity) getActivity();
+        app.attemptPublishBulb(bulb);
     }
 
 

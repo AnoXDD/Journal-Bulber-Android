@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.LruCache;
 import android.widget.Toast;
 
@@ -16,23 +17,15 @@ import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
 import com.onedrive.sdk.core.DefaultClientConfig;
 import com.onedrive.sdk.core.IClientConfig;
+import com.onedrive.sdk.extensions.IItemRequestBuilder;
 import com.onedrive.sdk.extensions.IOneDriveClient;
+import com.onedrive.sdk.extensions.Item;
 import com.onedrive.sdk.extensions.OneDriveClient;
 import com.onedrive.sdk.logger.LoggerLevel;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseActivity extends Activity {
-
-    /**
-     * The number of thumbnails to cache
-     */
-    private static final int MAX_IMAGE_CACHE_SIZE = 300;
-
-    /**
-     * Thumbnail cache
-     */
-    private LruCache<String, Bitmap> mImageCache;
 
     /**
      * The service instance
@@ -43,6 +36,8 @@ public class BaseActivity extends Activity {
      * The system connectivity manager
      */
     private ConnectivityManager mConnectivityManager;
+
+    private StorageManager storageManager;
 
     /**
      * What to do when the application starts
@@ -74,51 +69,10 @@ public class BaseActivity extends Activity {
         };
 
         final IClientConfig config = DefaultClientConfig.createWithAuthenticator(msaAuthenticator);
-        config.getLogger().setLoggingLevel(LoggerLevel.Debug);
+        config.getLogger()
+                .setLoggingLevel(LoggerLevel.Debug);
         return config;
     }
-
-    /**
-     * Navigates the user to the wifi settings if there is a connection problem
-     *
-     * @return if the wifi activity was navigated to
-     */
-    synchronized boolean goToWifiSettingsIfDisconnected() {
-        final NetworkInfo info = mConnectivityManager.getActiveNetworkInfo();
-        if (info == null || !info.isConnected()) {
-            Toast.makeText(this,
-                    getString(R.string.wifi_unavailable_error_message),
-                    Toast.LENGTH_LONG).show();
-            final Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            return true;
-        }
-        return false;
-    }
-
-//    /**
-//     * Clears out the auth token from the application store
-//     */
-//    void signOut() {
-//        if (mClient.get() == null) {
-//            return;
-//        }
-//        mClient.get().getAuthenticator().logout(new ICallback<Void>() {
-//            @Override
-//            public void success(final Void result) {
-//                mClient.set(null);
-//                final Intent intent = new Intent(getBaseContext(), Bulber.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                startActivity(intent);
-//            }
-//
-//            @Override
-//            public void failure(final ClientException ex) {
-//                Toast.makeText(getBaseContext(), "Logout error " + ex, Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
 
     /**
      * Get an instance of the service
@@ -158,14 +112,53 @@ public class BaseActivity extends Activity {
     }
 
     /**
-     * Gets the image cache for this application
+     * Attempts to publish a bulb
      *
-     * @return the image loader
+     * @param bulb The bulb to be published
      */
-    public synchronized LruCache<String, Bitmap> getImageCache() {
-        if (mImageCache == null) {
-            mImageCache = new LruCache<>(BaseActivity.MAX_IMAGE_CACHE_SIZE);
+    public void attemptPublishBulb(final String bulb) {
+        // Try to find the bulb folder
+        if (storageManager.getBulbFolderID() != null) {
+            publishBulbOnFolder(bulb);
+        } else {
+            getOneDriveClient().getDrive()
+                    .getRoot()
+                    .getItemWithPath("/Apps/Journal/bulb")
+                    .buildRequest()
+                    .get(new ICallback<Item>() {
+                        @Override
+                        public void success(Item item) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Get bulb folder: " + item.toString(),
+                                    Toast.LENGTH_LONG)
+                                    .show();
+
+                            // Store the data
+                            storageManager.setBulbFolderID(item.toString());
+
+                            publishBulbOnFolder(bulb);
+                        }
+
+                        @Override
+                        public void failure(ClientException ex) {
+                            ex.printStackTrace();
+                            Toast.makeText(getApplicationContext(),
+                                    "Unable to get the bulb folder",
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
         }
-        return mImageCache;
+    }
+
+    /**
+     * Publish the bulb to the bulb folder
+     *
+     * @param bulb
+     * @require bulb folder ID is valid (in `StorageManager`)
+     */
+    private void publishBulbOnFolder(final String bulb) {
+        String id = StorageManager.getBulbFolderID();
+
     }
 }
