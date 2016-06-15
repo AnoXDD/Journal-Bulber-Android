@@ -2,8 +2,6 @@ package me.anoxic.bulber2;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -44,8 +42,25 @@ public class FragmentSignIn extends Fragment {
         enableSignInButton(view);
         enablePushButton(view);
         enableDebugToggle(view);
+        enableUndoButton(view);
 
         return view;
+    }
+
+    private void enableUndoButton(View view) {
+        final Button undo = (Button) view.findViewById(R.id.undo);
+
+        undo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Try to get the last element id
+                final BaseActivity app = (BaseActivity) getActivity();
+
+                app.attemptRemoveLastPushedBulb();
+                app.hideKeyboard();
+            }
+        });
+
     }
 
     private void enableDebugToggle(View view) {
@@ -72,6 +87,9 @@ public class FragmentSignIn extends Fragment {
                 // Get the content
                 String bulb = bulbContent.getText()
                         .toString();
+
+                final BaseActivity app = (BaseActivity) getActivity();
+                app.hideKeyboard();
 
                 challengeSignIn(signin, bulb);
             }
@@ -118,23 +136,43 @@ public class FragmentSignIn extends Fragment {
      * @param bulb   The content of bulb. Leave it `null` to not publish anything
      */
     private void challengeSignIn(final Button signin, final String bulb) {
-        signin.setEnabled(false);
+        setButtonThrottled(signin);
         final BaseActivity app = (BaseActivity) getActivity();
         final ICallback<Void> serviceCreated = new DefaultCallback<Void>(getActivity()) {
             @Override
             public void success(final Void result) {
                 onTokenRefreshed(bulb);
-                signin.setEnabled(true);
+                resetSigninButtonThrottled(signin);
             }
         };
 
         try {
             app.getOneDriveClient();
             onTokenRefreshed(bulb);
-            signin.setEnabled(true);
+            resetSigninButtonThrottled(signin);
         } catch (final UnsupportedOperationException ignored) {
             app.createOneDriveClient(getActivity(), serviceCreated);
         }
+    }
+
+    /**
+     * Re-enable this signin button and tell the user it's done its job
+     *
+     * @param button the button to be reset throttling
+     */
+    private void resetSigninButtonThrottled(Button button) {
+        button.setText(getString(R.string.sign_in));
+        button.setEnabled(true);
+    }
+
+    /**
+     * Disable this button and tell the user it's doing something
+     *
+     * @param button the button to be throttled
+     */
+    private void setButtonThrottled(Button button) {
+        button.setText(getString(R.string.working));
+        button.setEnabled(false);
     }
 
     /**
@@ -144,12 +182,15 @@ public class FragmentSignIn extends Fragment {
      */
     private void onTokenRefreshed(final String bulb) {
         //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)                .show();
-        Toast.makeText(getContext(), "Bulb will be pushed: " + bulb, Toast.LENGTH_LONG)
-                .show();
+        if (bulb != null) {
+            Toast.makeText(getContext(),
+                    getContext().getString(R.string.bulb_push_progress),
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
 
         final BaseActivity app = (BaseActivity) getActivity();
         app.attemptPublishBulb(bulb);
     }
-
 
 }

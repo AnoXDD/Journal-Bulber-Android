@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,7 +36,7 @@ public class BaseActivity extends Activity {
      */
     private ConnectivityManager mConnectivityManager;
 
-    private StorageManager storageManager = new StorageManager();
+    public static StorageManager storageManager = new StorageManager();
 
     /**
      * What to do when the application starts
@@ -154,6 +156,9 @@ public class BaseActivity extends Activity {
      * @require bulb folder ID is valid (in `StorageManager`)
      */
     private void publishBulbOnFolder(final String bulb) {
+        if (bulb == null)
+            return;
+
         String id = storageManager.getBulbFolderID();
 
         final String filename = Timer.getCurrentBulbFilename();
@@ -173,6 +178,13 @@ public class BaseActivity extends Activity {
                 // Clear the field
                 final EditText editText = (EditText) findViewById(R.id.bulbContent);
                 editText.setText("");
+
+                // Store the last pushed data
+                storageManager.setLastPushedBulbID(item.id);
+
+                // Enable the undo button
+                final Button button = (Button) findViewById(R.id.undo);
+                button.setEnabled(true);
             }
 
             @Override
@@ -192,5 +204,60 @@ public class BaseActivity extends Activity {
                 .getContent()
                 .buildRequest()
                 .put(fileContents, callback);
+    }
+
+    public void attemptRemoveLastPushedBulb() {
+        // Try to get the id of last pushed bulb
+        String id = storageManager.getLastPushedBulbID();
+        if (id != null) {
+
+            final ICallback<Void> callback = new ICallback<Void>() {
+                @Override
+                public void success(Void aVoid) {
+                    Snackbar.make(getCurrentFocus(),
+                            getString(R.string.bulb_remove_last_pushed_success),
+                            Snackbar.LENGTH_LONG)
+                            .show();
+
+                    // Remove the id
+                    storageManager.clearLastPushedBulbID();
+
+                    // Disable the button
+                    final Button undo = (Button) findViewById(R.id.undo);
+                    undo.setEnabled(false);
+                }
+
+                @Override
+                public void failure(ClientException ex) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.bulb_remove_last_pushed_fail),
+                            Toast.LENGTH_SHORT).show();
+
+                    ex.printStackTrace();
+                }
+            };
+
+            this.getOneDriveClient()
+                    .getDrive()
+                    .getItems(id)
+                    .buildRequest()
+                    .delete(callback);
+
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.bulb_remove_last_pushed_fail),
+                    Toast.LENGTH_SHORT).show();
+
+            final Button button = (Button) findViewById(R.id.undo);
+            button.setEnabled(false);
+        }
+    }
+
+    public void hideKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
     }
 }

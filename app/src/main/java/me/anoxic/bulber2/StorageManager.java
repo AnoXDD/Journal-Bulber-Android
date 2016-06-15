@@ -19,7 +19,23 @@ public class StorageManager {
     public void setBulbFolderID(String bulbFolderID) {
         sharedPreferences.edit()
                 .putString(context.getString(R.string.bulb_folder_id), bulbFolderID)
-                .commit();
+                .apply();
+    }
+
+    public String getLastPushedBulbID() {
+        return sharedPreferences.getString(context.getString(R.string.bulb_last_pushed_id), null);
+    }
+
+    public void setLastPushedBulbID(String lastPushedBulbID) {
+        sharedPreferences.edit()
+                .putString(context.getString(R.string.bulb_last_pushed_id), lastPushedBulbID)
+                .apply();
+    }
+
+    public void clearLastPushedBulbID() {
+        sharedPreferences.edit()
+                .remove(context.getString(R.string.bulb_last_pushed_id))
+                .apply();
     }
 
     public SharedPreferences getSharedPreferences() {
