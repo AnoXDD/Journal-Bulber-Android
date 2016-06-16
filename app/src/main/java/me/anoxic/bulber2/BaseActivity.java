@@ -48,7 +48,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
     private MyLocationManager locationManager;
 
-    public static StorageManager storageManager = new StorageManager();
+    private static StorageManager storageManager = new StorageManager();
 
     /**
      * What to do when the application starts
@@ -90,6 +90,10 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                         REQUEST_FINE_LOCATION);
             }
         }
+    }
+
+    StorageManager getStorageManager() {
+        return storageManager;
     }
 
     /**
@@ -155,20 +159,10 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
     /**
      * Attempts to publish a bulb.
-     * This method will also add other attachments to it (E.g. location), if applicable
      *
      * @param bulb The bulb to be published
      */
     public void attemptPublishBulb(final String bulb) {
-        // Add location tag
-        final CheckBox locationCheckBox = (CheckBox) findViewById(R.id.isAppendLocation);
-        if (locationCheckBox.isChecked()) {
-            // Append the location
-            String location = this.locationManager.getFormattedLocation();
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + location);
-            bulb.concat(location);
-        }
-
         // Try to find the bulb folder
         if (storageManager.getBulbFolderID() != null) {
             publishBulbOnFolder(bulb);

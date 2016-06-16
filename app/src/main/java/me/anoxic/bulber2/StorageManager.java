@@ -11,6 +11,15 @@ public class StorageManager {
     private SharedPreferences sharedPreferences = null;
     private Context context = null;
     private boolean isDebugging = false;
+    private boolean isAttachingLocation = false;
+
+    public boolean isAttachingLocation() {
+        return isAttachingLocation;
+    }
+
+    public void setAttachingLocation(boolean attachingLocation) {
+        isAttachingLocation = attachingLocation;
+    }
 
     public boolean isDebugging() {
         return isDebugging;

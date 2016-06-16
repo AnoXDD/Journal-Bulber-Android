@@ -62,10 +62,11 @@ public class FragmentSignIn extends Fragment {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final BaseActivity baseActivity = (BaseActivity) getActivity();
+                baseActivity.getStorageManager().setAttachingLocation(isChecked);
+
                 if (isChecked) {
                     // Retrieve the current location when checked
-                    final BaseActivity baseActivity = (BaseActivity) getActivity();
-
                     baseActivity.promptCurrentLocation();
                 }
             }
@@ -98,7 +99,7 @@ public class FragmentSignIn extends Fragment {
                         .show();
 
                 final BaseActivity baseActivity = (BaseActivity) getActivity();
-                baseActivity.storageManager.setDebugging(isChecked);
+                baseActivity.getStorageManager().setDebugging(isChecked);
             }
         });
     }
@@ -208,7 +209,7 @@ public class FragmentSignIn extends Fragment {
      *
      * @param bulb The content of bulb. Leave it `null` to not publish anything
      */
-    private void onTokenRefreshed(final String bulb) {
+    private void onTokenRefreshed(String bulb) {
         //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)                .show();
         if (bulb != null) {
             Toast.makeText(getContext(),
@@ -218,7 +219,22 @@ public class FragmentSignIn extends Fragment {
         }
 
         final BaseActivity app = (BaseActivity) getActivity();
+        bulb = addTagsToBulb(bulb);
+
         app.attemptPublishBulb(bulb);
+    }
+
+    private String addTagsToBulb(String bulb) {
+        final BaseActivity baseActivity = (BaseActivity) getActivity();
+
+        // Add location tag
+        if (baseActivity.getStorageManager().isAttachingLocation()) {
+            // Append the location
+            String location = baseActivity.getLocationManager().getFormattedLocation();
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + location);
+            bulb = bulb.concat(location);
+        }
+        return bulb;
     }
 
 }
