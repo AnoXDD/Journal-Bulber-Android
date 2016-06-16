@@ -12,4 +12,9 @@
     <string name="bulb_push_progress">Pushing bulb...</string>
     <string name="working">Working...</string>
     <string name="sign_in">Sign In</string>
+    <string name="is_append_location">Location</string>
+    <string name="bulb_location_request_fail">Location permission not granted</string>
+    <string name="bulb_location_string_format"> #[%1$s,%2$s]</string>
+    <string name="bulb_location_request_granted">Location request granted</string>
+    <string name="bulb_prompt_current_location">Current location: %1$s</string>
 </resources>

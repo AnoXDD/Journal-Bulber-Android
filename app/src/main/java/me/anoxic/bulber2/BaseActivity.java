@@ -1,13 +1,22 @@
 package me.anoxic.bulber2;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -24,8 +33,9 @@ import com.onedrive.sdk.logger.LoggerLevel;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class BaseActivity extends Activity {
+public class BaseActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
+    private static final int REQUEST_FINE_LOCATION = 0;
     /**
      * The service instance
      */
@@ -35,6 +45,8 @@ public class BaseActivity extends Activity {
      * The system connectivity manager
      */
     private ConnectivityManager mConnectivityManager;
+
+    private MyLocationManager locationManager;
 
     public static StorageManager storageManager = new StorageManager();
 
@@ -46,11 +58,38 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Set up shared preference
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
         storageManager.setSharedPreferences(sharedPreferences)
                 .setContext(getApplicationContext());
 
+        // Request location
+        requestLocationPermission();
+
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        locationManager = new MyLocationManager(getApplicationContext());
+    }
+
+    private void requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_CONTACTS)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_FINE_LOCATION);
+            }
+        }
     }
 
     /**
@@ -115,15 +154,26 @@ public class BaseActivity extends Activity {
     }
 
     /**
-     * Attempts to publish a bulb
+     * Attempts to publish a bulb.
+     * This method will also add other attachments to it (E.g. location), if applicable
      *
      * @param bulb The bulb to be published
      */
     public void attemptPublishBulb(final String bulb) {
+        // Add location tag
+        final CheckBox locationCheckBox = (CheckBox) findViewById(R.id.isAppendLocation);
+        if (locationCheckBox.isChecked()) {
+            // Append the location
+            String location = this.locationManager.getFormattedLocation();
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + location);
+            bulb.concat(location);
+        }
+
         // Try to find the bulb folder
         if (storageManager.getBulbFolderID() != null) {
             publishBulbOnFolder(bulb);
         } else {
+            // Find the bulb folder on OneDrive first
             getOneDriveClient().getDrive()
                     .getRoot()
                     .getItemWithPath("/Apps/Journal/bulb")
@@ -156,8 +206,9 @@ public class BaseActivity extends Activity {
      * @require bulb folder ID is valid (in `StorageManager`)
      */
     private void publishBulbOnFolder(final String bulb) {
-        if (bulb == null)
+        if (bulb == null) {
             return;
+        }
 
         String id = storageManager.getBulbFolderID();
 
@@ -196,6 +247,10 @@ public class BaseActivity extends Activity {
             }
         };
 
+        if (storageManager.isDebugging()) {
+            return;
+        }
+
         this.getOneDriveClient()
                 .getDrive()
                 .getItems(id)
@@ -231,7 +286,8 @@ public class BaseActivity extends Activity {
                 public void failure(ClientException ex) {
                     Toast.makeText(getApplicationContext(),
                             getString(R.string.bulb_remove_last_pushed_fail),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT)
+                            .show();
 
                     ex.printStackTrace();
                 }
@@ -246,18 +302,73 @@ public class BaseActivity extends Activity {
         } else {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.bulb_remove_last_pushed_fail),
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT)
+                    .show();
 
             final Button button = (Button) findViewById(R.id.undo);
             button.setEnabled(false);
         }
     }
 
+    public MyLocationManager getLocationManager() {
+        return locationManager;
+    }
+
     public void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager)
-                getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    public void promptCurrentLocation() {
+        updateCurrentLocation();
+
+        // Prompt location
+        String string = locationManager.getFormattedLocation();
+        Toast.makeText(getApplicationContext(),
+                String.format(getString(R.string.bulb_prompt_current_location), string),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateCurrentLocation() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // Get the last know location from your location manager.
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                getApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.bulb_location_request_fail),
+                    Toast.LENGTH_SHORT)
+                    .show();
+
+            return;
+        }
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        this.locationManager.setLocation(location);
+    }
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_FINE_LOCATION) {
+            // Check if the only required permission has been granted
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission has been granted, preview can be displayed
+                Snackbar.make(getCurrentFocus(),
+                        R.string.bulb_location_request_granted,
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+            } else {
+                Snackbar.make(getCurrentFocus(),
+                        R.string.bulb_location_request_fail,
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+
+            }
+        }
     }
 }

@@ -1,13 +1,20 @@
 package me.anoxic.bulber2;
 
+import android.Manifest;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -43,8 +50,26 @@ public class FragmentSignIn extends Fragment {
         enablePushButton(view);
         enableDebugToggle(view);
         enableUndoButton(view);
+        enableLocationCheckbox(view);
 
         return view;
+    }
+
+    private void enableLocationCheckbox(View view) {
+
+        final CheckBox checkBox = (CheckBox) view.findViewById(R.id.isAppendLocation);
+
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // Retrieve the current location when checked
+                    final BaseActivity baseActivity = (BaseActivity) getActivity();
+
+                    baseActivity.promptCurrentLocation();
+                }
+            }
+        });
     }
 
     private void enableUndoButton(View view) {
@@ -71,6 +96,9 @@ public class FragmentSignIn extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Toast.makeText(getContext(), "The toggle is now: " + isChecked, Toast.LENGTH_SHORT)
                         .show();
+
+                final BaseActivity baseActivity = (BaseActivity) getActivity();
+                baseActivity.storageManager.setDebugging(isChecked);
             }
         });
     }

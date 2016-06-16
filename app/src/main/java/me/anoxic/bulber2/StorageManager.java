@@ -9,8 +9,16 @@ import android.content.SharedPreferences;
  */
 public class StorageManager {
     private SharedPreferences sharedPreferences = null;
-
     private Context context = null;
+    private boolean isDebugging = false;
+
+    public boolean isDebugging() {
+        return isDebugging;
+    }
+
+    public void setDebugging(boolean debugging) {
+        isDebugging = debugging;
+    }
 
     public String getBulbFolderID() {
         return sharedPreferences.getString(context.getString(R.string.bulb_folder_id), null);
