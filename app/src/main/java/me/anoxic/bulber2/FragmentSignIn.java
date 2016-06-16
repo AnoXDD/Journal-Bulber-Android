@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -51,8 +52,38 @@ public class FragmentSignIn extends Fragment {
         enableDebugToggle(view);
         enableUndoButton(view);
         enableLocationCheckbox(view);
+        enableLocationAddressTextMonitor(view);
 
         return view;
+    }
+
+    /**
+     * Adds listener to the edit text next to the checkbox of location
+     * Any change in this edittext will be saved in storageManager
+     *
+     * @param view - the view that has the edittext
+     */
+    private void enableLocationAddressTextMonitor(View view) {
+        final EditText editText = (EditText) view.findViewById(R.id.locationAddress);
+        final BaseActivity baseActivity = (BaseActivity) getActivity();
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                baseActivity.getStorageManager()
+                        .setCurrentLocationAddress((String) s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     private void enableLocationCheckbox(View view) {
@@ -63,7 +94,8 @@ public class FragmentSignIn extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 final BaseActivity baseActivity = (BaseActivity) getActivity();
-                baseActivity.getStorageManager().setAttachingLocation(isChecked);
+                baseActivity.getStorageManager()
+                        .setAttachingLocation(isChecked);
 
                 if (isChecked) {
                     // Retrieve the current location when checked
@@ -99,7 +131,8 @@ public class FragmentSignIn extends Fragment {
                         .show();
 
                 final BaseActivity baseActivity = (BaseActivity) getActivity();
-                baseActivity.getStorageManager().setDebugging(isChecked);
+                baseActivity.getStorageManager()
+                        .setDebugging(isChecked);
             }
         });
     }
@@ -228,9 +261,22 @@ public class FragmentSignIn extends Fragment {
         final BaseActivity baseActivity = (BaseActivity) getActivity();
 
         // Add location tag
-        if (baseActivity.getStorageManager().isAttachingLocation()) {
+        if (baseActivity.getStorageManager()
+                .isAttachingLocation()) {
             // Append the location
-            String location = baseActivity.getLocationManager().getFormattedLocation();
+            // Fetch the address if applicable
+            String locationAddress = baseActivity.getStorageManager()
+                    .getCurrentLocationAddress();
+
+            String location;
+            if (locationAddress == null) {
+                location = baseActivity.getLocationManager()
+                        .getFormattedLocation();
+            } else {
+                location = baseActivity.getLocationManager()
+                        .getFormattedLocationWithName(locationAddress);
+            }
+
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + location);
             bulb = bulb.concat(location);
         }

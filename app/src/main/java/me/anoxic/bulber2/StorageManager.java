@@ -12,6 +12,23 @@ public class StorageManager {
     private Context context = null;
     private boolean isDebugging = false;
     private boolean isAttachingLocation = false;
+    private String currentLocationAddress = null;
+
+    public String getCurrentLocationAddress() {
+        return currentLocationAddress;
+    }
+
+    public void setCurrentLocationAddress(String currentLocationAddress) {
+        if (currentLocationAddress.equals("")) {
+            clearCurrentLocationAddress();
+        } else {
+            this.currentLocationAddress = currentLocationAddress;
+        }
+    }
+
+    public void clearCurrentLocationAddress() {
+        currentLocationAddress = null;
+    }
 
     public boolean isAttachingLocation() {
         return isAttachingLocation;

@@ -34,15 +34,36 @@ public class MyLocationManager {
         mLocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
     }
 
+    /**
+     * Returns a string of a pair of latitude and longitude, in the format of #[lat,long]
+     *
+     * @return a string of current location, formatted as #[lat,long]
+     */
     public String getFormattedLocation() {
         Location location = myLocationListener.getCurrentLocation();
 
         return location == null ? "" : String.format(context.getString(R.string.bulb_location_string_format),
-                location.getLongitude(),
-                location.getLatitude());
+                location.getLatitude(),
+                location.getLongitude());
+    }
+
+    /**
+     * Returns a string of current location of latitude and longitude, along with a given name, in the format of #[name,lat,long]
+     *
+     * @return a string of current location, formatted as #[name,lat,long]
+     */
+    public String getFormattedLocationWithName(String name) {
+        Location location = myLocationListener.getCurrentLocation();
+
+        return location == null ? "" : String.format(context.getString(R.string.bulb_location_string_format_with_name),
+                name,
+                location.getLatitude(),
+                location.getLongitude());
     }
 
     public void setLocation(Location location) {
         this.myLocationListener.setCurrentLocation(location);
     }
+
+
 }
