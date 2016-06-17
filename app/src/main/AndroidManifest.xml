@@ -23,6 +23,10 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

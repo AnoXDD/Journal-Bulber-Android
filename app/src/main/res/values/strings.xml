@@ -18,4 +18,10 @@
     <string name="bulb_location_string_format_with_name">&#160;#[%1$s,%2$s,%3$s]</string>
     <string name="bulb_location_request_granted">Location request granted</string>
     <string name="bulb_prompt_current_location">Current location: %1$s</string>
+    <string name="service_not_available">Location service not available</string>
+    <string name="invalid_lat_long_used">Invalid location data used</string>
+    <string name="no_address_found">No address found for current location</string>
+    <string name="address_found">Address result found</string>
+    <string name="no_location_data_provided">No location is found</string>
+    <string name="no_geocoder_available">No geocoder is available</string>
 </resources>

@@ -65,5 +65,9 @@ public class MyLocationManager {
         this.myLocationListener.setCurrentLocation(location);
     }
 
+    public Location getLocation() {
+        return this.myLocationListener.getCurrentLocation();
+    }
+
 
 }
