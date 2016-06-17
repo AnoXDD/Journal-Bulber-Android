@@ -16,6 +16,7 @@ import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -115,9 +116,16 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
         // Initialize to get the location address
         mResultReceiver = new AddressResultReceiver(new Handler());
+        buildGoogleApiClient();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationManager = new MyLocationManager(getApplicationContext());
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        MultiDex.install(this);
     }
 
     private void requestLocationPermission() {

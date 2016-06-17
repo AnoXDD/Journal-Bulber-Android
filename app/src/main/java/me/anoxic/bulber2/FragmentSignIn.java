@@ -76,7 +76,7 @@ public class FragmentSignIn extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 baseActivity.getStorageManager()
-                        .setCurrentLocationAddress((String) s);
+                        .setCurrentLocationAddress(s.toString());
             }
 
             @Override
@@ -86,7 +86,7 @@ public class FragmentSignIn extends Fragment {
         });
     }
 
-    private void enableLocationCheckbox(View view) {
+    private void enableLocationCheckbox(final View view) {
 
         final CheckBox checkBox = (CheckBox) view.findViewById(R.id.isAppendLocation);
 
@@ -100,6 +100,8 @@ public class FragmentSignIn extends Fragment {
                 if (isChecked) {
                     // Retrieve the current location when checked
                     baseActivity.promptCurrentLocation();
+                    // Try to fetch the data
+                    baseActivity.fetchAddressButtonHandler(view);
                 }
             }
         });
