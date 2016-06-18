@@ -54,13 +54,17 @@
             android:layout_height="wrap_content"
             android:text="@string/is_append_location"
             android:id="@+id/isAppendLocation"
-            android:checked="false"/>
+            android:checked="false"
+            android:enabled="true"
+            />
 
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/locationAddress"
-            android:layout_weight="1"/>
+            android:singleLine="true"
+            android:layout_weight="1"
+            />
     </LinearLayout>
 
     <EditText
