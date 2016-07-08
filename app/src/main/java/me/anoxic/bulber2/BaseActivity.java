@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.location.Location;
@@ -120,6 +121,23 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationManager = new MyLocationManager(getApplicationContext());
+
+        // Set the version number
+        setVersionNumber();
+    }
+
+    private void setVersionNumber() {
+        PackageInfo pInfo = null;
+        try {
+            pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+
+            String version = pInfo.versionName;
+
+            TextView textView = (TextView) findViewById(R.id.version);
+            textView.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -529,7 +547,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
 
         // Pass the location data as an extra to the service.
-        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, locationManager.getLocation());
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA,
+                locationManager.getLocation());
 
         // Start the service. If the service isn't already running, it is instantiated and started
         // (creating a process for it if needed); if it is running then it remains running. The
@@ -558,7 +577,17 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      */
     protected void displayAddressOutput() {
         final EditText editText = (EditText) findViewById(R.id.locationAddress);
-        editText.setText(mAddressOutput);
+        final CheckBox checkBox = (CheckBox) findViewById(R.id.isAppendLocation);
+
+        checkBox.setEnabled(true);
+
+        if (mAddressOutput.equals(getString(R.string.service_not_available))) {
+            checkBox.setChecked(false);
+        } else {
+            checkBox.setChecked(true);
+            editText.setText(mAddressOutput);
+        }
+
     }
 
     /**

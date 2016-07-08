@@ -98,10 +98,13 @@ public class FragmentSignIn extends Fragment {
                         .setAttachingLocation(isChecked);
 
                 if (isChecked) {
+                    checkBox.setEnabled(false);
                     // Retrieve the current location when checked
                     baseActivity.promptCurrentLocation();
                     // Try to fetch the data
                     baseActivity.fetchAddressButtonHandler(view);
+                } else {
+                    ((EditText) view.findViewById(R.id.locationAddress)).setText("");
                 }
             }
         });
