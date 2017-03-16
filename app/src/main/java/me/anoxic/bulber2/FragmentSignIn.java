@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -95,14 +96,16 @@ public class FragmentSignIn extends Fragment {
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean isOn = (Integer) imageButton.getTag() == R.drawable.ic_location_on_black;
+                boolean wasOn = (Integer) imageButton.getTag() == R.drawable.ic_location_off_black;
+                final LinearLayout locationBox = (LinearLayout) view.findViewById(R.id.locationBox);
 
                 final BaseActivity baseActivity = (BaseActivity) getActivity();
                 baseActivity.getStorageManager()
-                        .setAttachingLocation(isOn);
+                        .setAttachingLocation(wasOn);
 
-                if (isOn) {
-                    baseActivity.setLocationAppend(false);
+                baseActivity.setLocationAppend(!wasOn);
+                locationBox.setVisibility(wasOn ? View.GONE : View.VISIBLE);
+                if (!wasOn) {
                     // Retrieve the current location when checked
                     baseActivity.promptCurrentLocation();
                     // Try to fetch the data
@@ -240,6 +243,7 @@ public class FragmentSignIn extends Fragment {
      */
     private void resetSigninButtonThrottled(ImageButton button) {
         // todo button.setText(getString(R.string.sign_in));
+        button.setAlpha(1f);
         button.setEnabled(true);
     }
 
@@ -250,6 +254,7 @@ public class FragmentSignIn extends Fragment {
      */
     private void setButtonThrottled(ImageButton button) {
         // todo button.setText(getString(R.string.working));
+        button.setAlpha(.5f);
         button.setEnabled(false);
     }
 

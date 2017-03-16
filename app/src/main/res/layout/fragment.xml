@@ -2,54 +2,45 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:animateLayoutChanges="true"
               android:orientation="vertical"
               android:weightSum="1">
 
-    <EditText
-        android:id="@+id/bulbContent"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/signin"
-        android:layout_centerHorizontal="true"
-        android:layout_column="2"
-        android:layout_row="2"
-        android:layout_weight="1.00"
-        android:gravity="top"
-        android:inputType="textCapSentences|textMultiLine"
-        />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:animateLayoutChanges="true">
+
+        <EditText
+            android:id="@+id/bulbContent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="top"
+            android:inputType="textCapSentences|textMultiLine"
+            />
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:gravity="bottom">
 
-        <ImageButton
-            android:id="@+id/push"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
-            android:background="@drawable/round_corner_accent"
-            android:enabled="false"
-            android:src="@drawable/ic_send_white"/>
+        <RelativeLayout
+            android:id="@+id/pushBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/locationBox"
-            android:layout_toLeftOf="@+id/push"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/isAppendLocation"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:enabled="true"
-                android:src="@drawable/ic_location_on_black"
-                android:tag="@drawable/ic_location_on_black"
-                />
+            android:orientation="horizontal"
+            android:visibility="gone"
+            >
 
             <EditText
                 android:id="@+id/locationAddress"
@@ -62,11 +53,11 @@
 
             <!--todo make this work-->
             <ImageButton
+                android:id="@+id/locationRefresh"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:id="@+id/locationRefresh"
-                android:src="@drawable/ic_refresh_black"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_refresh_black"
                 />
         </LinearLayout>
 
@@ -76,6 +67,18 @@
             android:layout_below="@id/locationBox"
             android:orientation="horizontal"
             >
+
+            <ImageButton
+                android:id="@+id/push"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/round_corner_accent"
+                android:enabled="false"
+                android:src="@drawable/ic_send_white"/>
 
             <ImageButton
                 android:id="@+id/signin"
@@ -94,10 +97,21 @@
                 android:src="@drawable/ic_undo_black"/>
 
             <ImageButton
+                android:id="@+id/isAppendLocation"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toLeftOf="@id/push"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:enabled="true"
+                android:src="@drawable/ic_location_on_black"
+                android:tag="@drawable/ic_location_on_black"
+                />
+
+            <ImageButton
                 android:id="@+id/camera"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_toRightOf="@id/undo"
+                android:layout_toLeftOf="@id/isAppendLocation"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_photo_camera_black"/>
 
@@ -105,9 +119,10 @@
                 android:id="@+id/gallery"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_toRightOf="@id/camera"
+                android:layout_toLeftOf="@id/camera"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_menu_gallery"/>
+
 
         </RelativeLayout>
 

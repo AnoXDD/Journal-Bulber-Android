@@ -589,9 +589,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     protected void setLocationAppend(boolean isOn) {
         final ImageButton imageButton = (ImageButton) findViewById(R.id.isAppendLocation);
-
-System.out.println(imageButton);
-
+        System.out.println(isOn);
         // If it is on, we want the user to look at it as if it can be turned off
         imageButton.setImageResource(isOn ? R.drawable.ic_location_off_black : R.drawable
                 .ic_location_on_black);
