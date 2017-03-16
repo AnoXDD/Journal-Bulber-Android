@@ -5,48 +5,22 @@
               android:orientation="vertical"
               android:weightSum="1">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/bulbContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-
-        <Button
-            android:id="@+id/signin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/bulbContent"
-            android:layout_column="2"
-            android:layout_row="0"
-            android:text="@string/sign_in"/>
-
-        <Button
-            android:id="@+id/push"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="Push"/>
-
-        <Button
-            android:id="@+id/undo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Undo"
-            />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-        </LinearLayout>
-
-    </LinearLayout>
+        android:layout_below="@+id/signin"
+        android:layout_centerHorizontal="true"
+        android:layout_column="2"
+        android:layout_row="2"
+        android:layout_weight="1.00"
+        android:gravity="top"
+        android:inputType="textCapSentences|textMultiLine"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:orientation="horizontal">
 
         <CheckBox
@@ -55,7 +29,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:enabled="true"
-            android:text="@string/is_append_location"
+            android:text="Location"
             />
 
         <EditText
@@ -68,18 +42,58 @@
             />
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/bulbContent"
-        android:inputType="textCapSentences|textMultiLine"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/signin"
-        android:layout_centerHorizontal="true"
-        android:layout_column="2"
-        android:layout_row="2"
-        android:layout_weight="1.00"
-        android:gravity="top"
-        />
+        android:orientation="horizontal"
+        >
+
+        <ImageButton
+            android:id="@+id/signin"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_account_box_black"
+            />
+
+        <ImageButton
+            android:layout_toRightOf="@id/signin"
+            android:id="@+id/undo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_undo_black"/>
+
+        <ImageButton
+            android:layout_toRightOf="@id/undo"
+            android:id="@+id/camera"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_photo_camera_black"/>
+
+        <ImageButton
+            android:layout_toRightOf="@id/camera"
+            android:id="@+id/gallery"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_menu_gallery"/>
+
+        <ImageButton
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:id="@+id/push"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/round_corner_accent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:enabled="false"
+            android:src="@drawable/ic_send_white"/>
+
+
+    </RelativeLayout>
+
 
     <Switch
         android:id="@+id/isDebug"

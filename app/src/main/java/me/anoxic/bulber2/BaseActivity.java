@@ -26,6 +26,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -304,7 +305,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                 storageManager.setLastPushedBulbID(item.id);
 
                 // Enable the undo button
-                final Button button = (Button) findViewById(R.id.undo);
+                final ImageButton button = (ImageButton) findViewById(R.id.undo);
                 button.setEnabled(true);
             }
 
@@ -348,7 +349,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                     storageManager.clearLastPushedBulbID();
 
                     // Disable the button
-                    final Button undo = (Button) findViewById(R.id.undo);
+                    final ImageButton undo = (ImageButton) findViewById(R.id.undo);
                     undo.setEnabled(false);
                 }
 
@@ -375,7 +376,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                     Toast.LENGTH_SHORT)
                     .show();
 
-            final Button button = (Button) findViewById(R.id.undo);
+            final ImageButton button = (ImageButton) findViewById(R.id.undo);
             button.setEnabled(false);
         }
     }

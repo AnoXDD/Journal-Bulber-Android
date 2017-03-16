@@ -14,7 +14,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -111,7 +111,7 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enableUndoButton(View view) {
-        final Button undo = (Button) view.findViewById(R.id.undo);
+        final ImageButton undo = (ImageButton) view.findViewById(R.id.undo);
 
         undo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,9 +143,9 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enablePushButton(final View view) {
-        final Button push = (Button) view.findViewById(R.id.push);
+        final ImageButton push = (ImageButton) view.findViewById(R.id.push);
         final EditText bulbContent = (EditText) view.findViewById(R.id.bulbContent);
-        final Button signin = (Button) view.findViewById(R.id.signin);
+        final ImageButton signin = (ImageButton) view.findViewById(R.id.signin);
 
         push.setOnClickListener(new View.OnClickListener() {
 
@@ -164,7 +164,7 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enableSignInButton(final View view) {
-        final Button signin = (Button) view.findViewById(R.id.signin);
+        final ImageButton signin = (ImageButton) view.findViewById(R.id.signin);
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,7 +184,7 @@ public class FragmentSignIn extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                final Button button = (Button) view.findViewById(R.id.push);
+                final ImageButton button = (ImageButton) view.findViewById(R.id.push);
 
                 button.setEnabled(s.length() != 0);
             }
@@ -202,7 +202,7 @@ public class FragmentSignIn extends Fragment {
      * @param signin The button for signing in
      * @param bulb   The content of bulb. Leave it `null` to not publish anything
      */
-    private void challengeSignIn(final Button signin, final String bulb) {
+    private void challengeSignIn(final ImageButton signin, final String bulb) {
         setButtonThrottled(signin);
         final BaseActivity app = (BaseActivity) getActivity();
         final ICallback<Void> serviceCreated = new DefaultCallback<Void>(getActivity()) {
@@ -227,8 +227,8 @@ public class FragmentSignIn extends Fragment {
      *
      * @param button the button to be reset throttling
      */
-    private void resetSigninButtonThrottled(Button button) {
-        button.setText(getString(R.string.sign_in));
+    private void resetSigninButtonThrottled(ImageButton button) {
+        // todo button.setText(getString(R.string.sign_in));
         button.setEnabled(true);
     }
 
@@ -237,8 +237,8 @@ public class FragmentSignIn extends Fragment {
      *
      * @param button the button to be throttled
      */
-    private void setButtonThrottled(Button button) {
-        button.setText(getString(R.string.working));
+    private void setButtonThrottled(ImageButton button) {
+        // todo button.setText(getString(R.string.working));
         button.setEnabled(false);
     }
 
