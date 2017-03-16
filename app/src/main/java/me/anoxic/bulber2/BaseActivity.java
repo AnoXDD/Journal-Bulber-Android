@@ -186,7 +186,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             @Override
             public String[] getScopes() {
-                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl" +
+                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl" + "" +
                         ".offline_access"};
             }
         };
@@ -423,12 +423,12 @@ public class BaseActivity extends Activity implements ActivityCompat
             // Check if the only required permission has been granted
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission has been granted, preview can be displayed
-                Snackbar.make(getCurrentFocus(), R.string.bulb_location_request_granted, Snackbar
-                        .LENGTH_SHORT)
+                Toast.makeText(getApplicationContext(), R.string.bulb_location_request_granted,
+                        Toast.LENGTH_SHORT)
                         .show();
             } else {
-                Snackbar.make(getCurrentFocus(), R.string.bulb_location_request_fail, Snackbar
-                        .LENGTH_SHORT)
+                Toast.makeText(getApplicationContext(), R.string.bulb_location_request_fail,
+                        Toast.LENGTH_SHORT)
                         .show();
 
             }
