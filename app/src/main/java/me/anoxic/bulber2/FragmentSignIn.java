@@ -88,17 +88,22 @@ public class FragmentSignIn extends Fragment {
 
     private void enableLocationCheckbox(final View view) {
 
-        final CheckBox checkBox = (CheckBox) view.findViewById(R.id.isAppendLocation);
+        final ImageButton imageButton = (ImageButton) view.findViewById(R.id.isAppendLocation);
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        // At the beginning, this image button is off
+        imageButton.setTag(R.drawable.ic_location_on_black);
+
+        imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onClick(View v) {
+                boolean isOn = (Integer) imageButton.getTag() == R.drawable.ic_location_on_black;
+
                 final BaseActivity baseActivity = (BaseActivity) getActivity();
                 baseActivity.getStorageManager()
-                        .setAttachingLocation(isChecked);
+                        .setAttachingLocation(isOn);
 
-                if (isChecked) {
-                    checkBox.setEnabled(false);
+                if (isOn) {
+                    baseActivity.setLocationAppend(false);
                     // Retrieve the current location when checked
                     baseActivity.promptCurrentLocation();
                     // Try to fetch the data
@@ -106,6 +111,7 @@ public class FragmentSignIn extends Fragment {
                 } else {
                     ((EditText) view.findViewById(R.id.locationAddress)).setText("");
                 }
+
             }
         });
     }

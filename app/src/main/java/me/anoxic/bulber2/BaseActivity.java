@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
@@ -51,9 +52,8 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationServices;
 
 
-public class BaseActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback,
-        ConnectionCallbacks,
-        OnConnectionFailedListener {
+public class BaseActivity extends Activity implements ActivityCompat
+        .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int REQUEST_FINE_LOCATION = 0;
 
@@ -148,12 +148,12 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) !=
+                PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_CONTACTS)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .READ_CONTACTS)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
@@ -162,9 +162,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             } else {
 
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        REQUEST_FINE_LOCATION);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
             }
         }
     }
@@ -187,7 +186,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
             @Override
             public String[] getScopes() {
-                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl.offline_access"};
+                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl" +
+                        ".offline_access"};
             }
         };
 
@@ -215,10 +215,10 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      * @param activity       the current activity
      * @param serviceCreated the callback
      */
-    synchronized void createOneDriveClient(final Activity activity,
-                                           final ICallback<Void> serviceCreated) {
-        final DefaultCallback<IOneDriveClient> callback = new DefaultCallback<IOneDriveClient>(
-                activity) {
+    synchronized void createOneDriveClient(final Activity activity, final ICallback<Void>
+            serviceCreated) {
+        final DefaultCallback<IOneDriveClient> callback = new DefaultCallback<IOneDriveClient>
+                (activity) {
             @Override
             public void success(final IOneDriveClient result) {
                 mClient.set(result);
@@ -261,9 +261,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                         @Override
                         public void failure(ClientException ex) {
                             ex.printStackTrace();
-                            Toast.makeText(getApplicationContext(),
-                                    "Unable to get the bulb folder",
-                                    Toast.LENGTH_LONG)
+                            Toast.makeText(getApplicationContext(), "Unable to get the bulb " +
+                                    "folder", Toast.LENGTH_LONG)
                                     .show();
                         }
                     });
@@ -292,9 +291,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             }
 
             public void success(final Item item) {
-                Snackbar.make(getCurrentFocus(),
-                        getString(R.string.bulb_pushed),
-                        Snackbar.LENGTH_LONG)
+                Snackbar.make(getCurrentFocus(), getString(R.string.bulb_pushed), Snackbar
+                        .LENGTH_LONG)
                         .show();
 
                 // Clear the field
@@ -311,9 +309,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
             @Override
             public void failure(ClientException ex) {
-                Snackbar.make(getCurrentFocus(),
-                        getString(R.string.bulb_push_failed),
-                        Snackbar.LENGTH_LONG)
+                Snackbar.make(getCurrentFocus(), getString(R.string.bulb_push_failed), Snackbar
+                        .LENGTH_LONG)
                         .show();
             }
         };
@@ -340,9 +337,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             final ICallback<Void> callback = new ICallback<Void>() {
                 @Override
                 public void success(Void aVoid) {
-                    Snackbar.make(getCurrentFocus(),
-                            getString(R.string.bulb_remove_last_pushed_success),
-                            Snackbar.LENGTH_LONG)
+                    Snackbar.make(getCurrentFocus(), getString(R.string
+                            .bulb_remove_last_pushed_success), Snackbar.LENGTH_LONG)
                             .show();
 
                     // Remove the id
@@ -355,9 +351,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
                 @Override
                 public void failure(ClientException ex) {
-                    Toast.makeText(getApplicationContext(),
-                            getString(R.string.bulb_remove_last_pushed_fail),
-                            Toast.LENGTH_SHORT)
+                    Toast.makeText(getApplicationContext(), getString(R.string
+                            .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
                             .show();
 
                     ex.printStackTrace();
@@ -371,9 +366,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                     .delete(callback);
 
         } else {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.bulb_remove_last_pushed_fail),
-                    Toast.LENGTH_SHORT)
+            Toast.makeText(getApplicationContext(), getString(R.string
+                    .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
                     .show();
 
             final ImageButton button = (ImageButton) findViewById(R.id.undo);
@@ -386,7 +380,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     public void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context
+                .INPUT_METHOD_SERVICE);
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
@@ -397,23 +392,22 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
         // Prompt location
         String string = locationManager.getFormattedLocation();
-        Toast.makeText(getApplicationContext(),
-                String.format(getString(R.string.bulb_prompt_current_location), string),
-                Toast.LENGTH_SHORT)
+        Toast.makeText(getApplicationContext(), String.format(getString(R.string
+                .bulb_prompt_current_location), string), Toast.LENGTH_SHORT)
                 .show();
     }
 
     private void updateCurrentLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context
+                .LOCATION_SERVICE);
 
         // Get the last know location from your location manager.
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                getApplicationContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.bulb_location_request_fail),
-                    Toast.LENGTH_SHORT)
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission
+                .ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
+                .checkSelfPermission(getApplicationContext(), Manifest.permission
+                        .ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), getString(R.string
+                    .bulb_location_request_fail), Toast.LENGTH_SHORT)
                     .show();
 
             return;
@@ -423,21 +417,18 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         this.locationManager.setLocation(location);
     }
 
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_FINE_LOCATION) {
             // Check if the only required permission has been granted
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission has been granted, preview can be displayed
-                Snackbar.make(getCurrentFocus(),
-                        R.string.bulb_location_request_granted,
-                        Snackbar.LENGTH_SHORT)
+                Snackbar.make(getCurrentFocus(), R.string.bulb_location_request_granted, Snackbar
+                        .LENGTH_SHORT)
                         .show();
             } else {
-                Snackbar.make(getCurrentFocus(),
-                        R.string.bulb_location_request_fail,
-                        Snackbar.LENGTH_SHORT)
+                Snackbar.make(getCurrentFocus(), R.string.bulb_location_request_fail, Snackbar
+                        .LENGTH_SHORT)
                         .show();
 
             }
@@ -511,9 +502,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     public void onConnected(Bundle connectionHint) {
         // Gets the best and most recent location currently available, which may be null
         // in rare cases when a location is not available.
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -548,8 +538,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
 
         // Pass the location data as an extra to the service.
-        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA,
-                locationManager.getLocation());
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, locationManager
+                .getLocation());
 
         // Start the service. If the service isn't already running, it is instantiated and started
         // (creating a process for it if needed); if it is running then it remains running. The
@@ -578,17 +568,35 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      */
     protected void displayAddressOutput() {
         final EditText editText = (EditText) findViewById(R.id.locationAddress);
-        final CheckBox checkBox = (CheckBox) findViewById(R.id.isAppendLocation);
+        final ImageButton imageButton = (ImageButton) findViewById(R.id.isAppendLocation);
 
-        checkBox.setEnabled(true);
+        imageButton.setEnabled(true);
 
         if (mAddressOutput.equals(getString(R.string.service_not_available))) {
-            checkBox.setChecked(false);
+            setLocationAppend(false);
+
         } else {
-            checkBox.setChecked(true);
+            setLocationAppend(true);
             editText.setText(mAddressOutput);
         }
 
+    }
+
+    /**
+     * Sets (changes) the location append button
+     *
+     * @param isOn - true if the location is appended
+     */
+    protected void setLocationAppend(boolean isOn) {
+        final ImageButton imageButton = (ImageButton) findViewById(R.id.isAppendLocation);
+
+System.out.println(imageButton);
+
+        // If it is on, we want the user to look at it as if it can be turned off
+        imageButton.setImageResource(isOn ? R.drawable.ic_location_off_black : R.drawable
+                .ic_location_on_black);
+        imageButton.setTag(isOn ? R.drawable.ic_location_off_black : R.drawable
+                .ic_location_on_black);
     }
 
     /**
@@ -624,7 +632,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
             // Display the address string or an error message sent from the intent service.
-            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants
+                    .RESULT_DATA_KEY);
             displayAddressOutput();
 
             // Show a toast message if an address was found.

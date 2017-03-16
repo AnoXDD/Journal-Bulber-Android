@@ -18,79 +18,98 @@
         android:inputType="textCapSentences|textMultiLine"
         />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/isAppendLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:enabled="true"
-            android:text="Location"
-            />
-
-        <EditText
-            android:id="@+id/locationAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            />
-    </LinearLayout>
-
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
         <ImageButton
-            android:id="@+id/signin"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_account_box_black"
-            />
-
-        <ImageButton
-            android:layout_toRightOf="@id/signin"
-            android:id="@+id/undo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_undo_black"/>
-
-        <ImageButton
-            android:layout_toRightOf="@id/undo"
-            android:id="@+id/camera"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_photo_camera_black"/>
-
-        <ImageButton
-            android:layout_toRightOf="@id/camera"
-            android:id="@+id/gallery"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_menu_gallery"/>
-
-        <ImageButton
+            android:id="@+id/push"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_marginRight="10dp"
-            android:id="@+id/push"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
             android:background="@drawable/round_corner_accent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:enabled="false"
             android:src="@drawable/ic_send_white"/>
 
+        <LinearLayout
+            android:id="@+id/locationBox"
+            android:layout_toLeftOf="@+id/push"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/isAppendLocation"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:enabled="true"
+                android:src="@drawable/ic_location_on_black"
+                android:tag="@drawable/ic_location_on_black"
+                />
+
+            <EditText
+                android:id="@+id/locationAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                />
+
+            <!--todo make this work-->
+            <ImageButton
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:id="@+id/locationRefresh"
+                android:src="@drawable/ic_refresh_black"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/locationBox"
+            android:orientation="horizontal"
+            >
+
+            <ImageButton
+                android:id="@+id/signin"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_account_box_black"
+                />
+
+            <ImageButton
+                android:id="@+id/undo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toRightOf="@id/signin"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_undo_black"/>
+
+            <ImageButton
+                android:id="@+id/camera"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toRightOf="@id/undo"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_photo_camera_black"/>
+
+            <ImageButton
+                android:id="@+id/gallery"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toRightOf="@id/camera"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_menu_gallery"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
