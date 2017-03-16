@@ -41,9 +41,8 @@ public class FragmentSignIn extends Fragment {
      * @return The constructed view
      */
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final
+    Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.fragment, container, false);
 
@@ -133,17 +132,23 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enableDebugToggle(View view) {
-        final Switch aSwitch = (Switch) view.findViewById(R.id.isDebug);
+        final ImageButton send = (ImageButton) view.findViewById(R.id.push);
 
-        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        send.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Toast.makeText(getContext(), "The toggle is now: " + isChecked, Toast.LENGTH_SHORT)
+            public boolean onLongClick(View v) {
+                final BaseActivity baseActivity = (BaseActivity) getActivity();
+                StorageManager storageManager = baseActivity.getStorageManager();
+
+                boolean isNowDebug = !storageManager.isDebugging();
+                storageManager.setDebugging(isNowDebug);
+
+                Toast.makeText(getContext(), isNowDebug ? baseActivity.getString(R.string
+                        .debug_turned_on) : baseActivity.getString(R.string.debug_turned_off),
+                        Toast.LENGTH_SHORT)
                         .show();
 
-                final BaseActivity baseActivity = (BaseActivity) getActivity();
-                baseActivity.getStorageManager()
-                        .setDebugging(isChecked);
+                return true;
             }
         });
     }
@@ -254,10 +259,10 @@ public class FragmentSignIn extends Fragment {
      * @param bulb The content of bulb. Leave it `null` to not publish anything
      */
     private void onTokenRefreshed(String bulb) {
-        //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)                .show();
+        //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)
+        // .show();
         if (bulb != null) {
-            Toast.makeText(getContext(),
-                    getContext().getString(R.string.bulb_push_progress),
+            Toast.makeText(getContext(), getContext().getString(R.string.bulb_push_progress),
                     Toast.LENGTH_LONG)
                     .show();
         }

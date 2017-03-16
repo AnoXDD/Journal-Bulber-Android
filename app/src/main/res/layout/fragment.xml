@@ -113,20 +113,6 @@
 
     </RelativeLayout>
 
-
-    <Switch
-        android:id="@+id/isDebug"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/signin"
-        android:layout_alignBottom="@+id/signin"
-        android:layout_alignEnd="@+id/bulbContent"
-        android:layout_column="19"
-        android:layout_gravity="center_horizontal"
-        android:layout_row="29"
-        android:layout_weight="1.00"
-        android:text="Toggle Debug"/>
-
     <TextView
         android:id="@+id/version"
         android:layout_width="wrap_content"

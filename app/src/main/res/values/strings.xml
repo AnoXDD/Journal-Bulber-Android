@@ -24,4 +24,6 @@
     <string name="address_found">Address result found</string>
     <string name="no_location_data_provided">No location is found</string>
     <string name="no_geocoder_available">No geocoder is available</string>
+    <string name="debug_turned_on">Debugging is turned ON</string>
+    <string name="debug_turned_off">Debugging is turned off</string>
 </resources>
