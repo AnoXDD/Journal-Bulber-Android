@@ -100,6 +100,8 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     protected String mAddressOutput;
 
+    protected Uri photoImageUri;
+
     /**
      * Receiver registered with this activity to get the response from FetchAddressIntentService.
      */
@@ -683,9 +685,9 @@ public class BaseActivity extends Activity implements ActivityCompat
                 }
 
                 if (photo != null) {
-                    Uri uri = FileProvider.getUriForFile(this, "com.example.android" + "" +
+                    this.photoImageUri = FileProvider.getUriForFile(this, "com.example.android" +
                             ".fileprovider", photo);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoImageUri);
 
                     startActivityForResult(intent, TAKE_IMAGE);
                 }
@@ -702,6 +704,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     /**
      * Create a local image file
      * todo remove all the local files
+     *
      * @return a created file
      * @throws IOException - whatever IOException appears
      */
@@ -727,22 +730,32 @@ public class BaseActivity extends Activity implements ActivityCompat
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST || requestCode == TAKE_IMAGE) {
-                Uri uri = data.getData();
+                Uri uri = null;
+                if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
+                    uri = data.getData();
+                } else if (requestCode == TAKE_IMAGE) {
+                    uri = this.photoImageUri;
+                }
 
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Log.d(TAG, "uri is " + uri.toString());
 
-                    ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
-                    imageView.setImageBitmap(bitmap);
+                if (uri != null) {
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),
+                                uri);
 
-                    storageManager.setBulbImage(uri);
-                } catch (IOException e) {
-                    Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
-                            .LENGTH_SHORT)
-                            .show();
-                    e.printStackTrace();
+                        ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+                        imageView.setImageBitmap(bitmap);
+
+                        storageManager.setBulbImage(uri);
+                    } catch (IOException e) {
+                        Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
+                                .LENGTH_SHORT)
+                                .show();
+                        e.printStackTrace();
+                    }
                 }
             }
         }
