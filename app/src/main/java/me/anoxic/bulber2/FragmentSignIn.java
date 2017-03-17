@@ -1,25 +1,15 @@
 package me.anoxic.bulber2;
 
-import android.Manifest;
 import android.app.Fragment;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.onedrive.sdk.concurrency.ICallback;
@@ -28,6 +18,7 @@ import com.onedrive.sdk.concurrency.ICallback;
  * Created by Anoxic on 061516.
  */
 public class FragmentSignIn extends Fragment {
+
 
     public FragmentSignIn() {
 
@@ -53,9 +44,29 @@ public class FragmentSignIn extends Fragment {
         enableUndoButton(view);
         enableLocationCheckbox(view);
         enableLocationAddressTextMonitor(view);
+        enableGalleryButton(view);
+        enableCameraButton(view);
 
         return view;
     }
+
+    private void enableCameraButton(View view) {
+        // TODO : implement this
+        // Created by Anoxic 031617 
+    }
+
+    private void enableGalleryButton(View view) {
+        // todo implement this
+        final ImageButton button = (ImageButton) view.findViewById(R.id.gallery);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((BaseActivity) getActivity()).attemptAttachPhoto(false);
+            }
+        });
+    }
+
 
     /**
      * Adds listener to the edit text next to the checkbox of location
@@ -63,6 +74,7 @@ public class FragmentSignIn extends Fragment {
      *
      * @param view - the view that has the edittext
      */
+
     private void enableLocationAddressTextMonitor(View view) {
         final EditText editText = (EditText) view.findViewById(R.id.locationAddress);
         final BaseActivity baseActivity = (BaseActivity) getActivity();

@@ -11,6 +11,6 @@ public class Timer {
 
     public static String getCurrentBulbFilename() {
         DateFormat dateFormat = new DateFormat();
-        return (String) dateFormat.format("MMddyy'_'HHmmss", new java.util.Date());
+        return (String) DateFormat.format("MMddyy'_'HHmmss", new java.util.Date());
     }
 }
