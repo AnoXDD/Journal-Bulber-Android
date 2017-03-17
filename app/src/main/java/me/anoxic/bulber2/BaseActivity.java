@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
@@ -22,6 +23,7 @@ import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -46,6 +48,7 @@ import com.onedrive.sdk.extensions.Item;
 import com.onedrive.sdk.extensions.OneDriveClient;
 import com.onedrive.sdk.logger.LoggerLevel;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -54,11 +57,13 @@ public class BaseActivity extends Activity implements ActivityCompat
         .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int REQUEST_FINE_LOCATION = 0;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     protected static final String TAG = "main-activity";
     protected static final String ADDRESS_REQUESTED_KEY = "address-request-pending";
     protected static final String LOCATION_ADDRESS_KEY = "location-address";
 
+    private static final int TAKE_IMAGE = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
 
     /**
@@ -116,6 +121,9 @@ public class BaseActivity extends Activity implements ActivityCompat
         // Request location
         requestLocationPermission();
 
+        // Request write external storage (for camera)
+        requestWriteExternalStoragePermission();
+
         // Initialize to get the location address
         mResultReceiver = new AddressResultReceiver(new Handler());
         buildGoogleApiClient();
@@ -155,13 +163,34 @@ public class BaseActivity extends Activity implements ActivityCompat
         MultiDex.install(this);
     }
 
+    private void requestWriteExternalStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .WRITE_EXTERNAL_STORAGE)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+    }
+
     private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) !=
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
-                    .READ_CONTACTS)) {
+                    .ACCESS_FINE_LOCATION)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
@@ -248,7 +277,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      * @param bulb The bulb to be published
      */
     public void attemptPublishBulb(final String bulb) {
-        // todo clear the image anyways
+        // todo clear the image anyways if it's a new photo
         // Try to find the bulb folder
         if (storageManager.getBulbFolderID() != null) {
             publishBulbOnFolder(bulb);
@@ -428,19 +457,27 @@ public class BaseActivity extends Activity implements ActivityCompat
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_FINE_LOCATION) {
-            // Check if the only required permission has been granted
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission has been granted, preview can be displayed
-                Toast.makeText(getApplicationContext(), R.string.bulb_location_request_granted,
+        switch (requestCode) {
+            case REQUEST_FINE_LOCATION:
+                // Check if the only required permission has been granted
+                if (grantResults.length == 1 && grantResults[0] == PackageManager
+                        .PERMISSION_GRANTED) {
+                    // Location permission has been granted, preview can be displayed
+                /* Toast.makeText(getApplicationContext(), R.string.bulb_location_request_granted,
                         Toast.LENGTH_SHORT)
                         .show();
-            } else {
-                Toast.makeText(getApplicationContext(), R.string.bulb_location_request_fail,
-                        Toast.LENGTH_SHORT)
-                        .show();
+                       */
 
-            }
+                    Log.d(TAG, getString(R.string.bulb_location_request_granted));
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.bulb_location_request_fail,
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+
+            case REQUEST_WRITE_EXTERNAL_STORAGE:
+
         }
     }
 
@@ -481,7 +518,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     public void fetchAddressButtonHandler(View view) {
         // We only start the service to fetch the address if GoogleApiClient is connected.
         if (mGoogleApiClient.isConnected() && locationManager.getLocation() != null) {
-            startIntentService();
+            startLocationRequestIntentService();
         }
         // If GoogleApiClient isn't connected, we process the user's request by setting
         // mAddressRequested to true. Later, when GoogleApiClient connects, we launch the service to
@@ -530,7 +567,7 @@ public class BaseActivity extends Activity implements ActivityCompat
             // fetchAddressButtonHandler()) . Instead, we start the intent service here if the
             // user has requested an address, since we now have a connection to GoogleApiClient.
             if (mAddressRequested) {
-                startIntentService();
+                startLocationRequestIntentService();
             }
         }
     }
@@ -539,7 +576,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      * Creates an intent, adds location data to it as an extra, and starts the intent service for
      * fetching an address.
      */
-    protected void startIntentService() {
+    protected void startLocationRequestIntentService() {
         // Create an intent for passing to the intent service responsible for fetching the address.
         Intent intent = new Intent(this, FetchAddressIntentService.class);
 
@@ -632,6 +669,27 @@ public class BaseActivity extends Activity implements ActivityCompat
     public void attemptAttachPhoto(boolean isCamera) {
 
         if (isCamera) {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // Make sure there is something to handle this intent
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                File photo = null;
+                try {
+                    photo = createImageFile();
+                } catch (IOException e) {
+                    Toast.makeText(BaseActivity.this, R.string.create_local_image_fail, Toast
+                            .LENGTH_SHORT)
+                            .show();
+                    e.printStackTrace();
+                }
+
+                if (photo != null) {
+                    Uri uri = FileProvider.getUriForFile(this, "com.example.android" + "" +
+                            ".fileprovider", photo);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+                    startActivityForResult(intent, TAKE_IMAGE);
+                }
+            }
         } else {
             Intent intent = new Intent();
             intent.setType("image/*");
@@ -639,6 +697,19 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
         }
+    }
+
+    /**
+     * Create a local image file
+     * todo remove all the local files
+     * @return a created file
+     * @throws IOException - whatever IOException appears
+     */
+    private File createImageFile() throws IOException {
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile("bulbImage", ".jpg", storageDir);
+
+        return image;
     }
 
     /**
@@ -656,23 +727,23 @@ public class BaseActivity extends Activity implements ActivityCompat
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data
-                .getData() != null) {
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            if (requestCode == PICK_IMAGE_REQUEST || requestCode == TAKE_IMAGE) {
+                Uri uri = data.getData();
 
-            Uri uri = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
 
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
+                    ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+                    imageView.setImageBitmap(bitmap);
 
-                ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
-                imageView.setImageBitmap(bitmap);
-
-                storageManager.setBulbImage(uri);
-            } catch (IOException e) {
-                Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast.LENGTH_SHORT)
-                        .show();
-                e.printStackTrace();
+                    storageManager.setBulbImage(uri);
+                } catch (IOException e) {
+                    Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
+                            .LENGTH_SHORT)
+                            .show();
+                    e.printStackTrace();
+                }
             }
         }
     }

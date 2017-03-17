@@ -28,4 +28,5 @@
     <string name="debug_turned_off">Debugging is turned off</string>
     <string name="select_photo_fail">Unable to get the photo selected</string>
     <string name="bulb_image_uri">bulbImageUri</string>
+    <string name="create_local_image_fail">Unable to create a local image file</string>
 </resources>

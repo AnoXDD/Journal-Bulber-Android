@@ -65,8 +65,14 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enableCameraButton(View view) {
-        // TODO : implement this
-        // Created by Anoxic 031617 
+        final ImageButton button = (ImageButton) view.findViewById(R.id.camera);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((BaseActivity) getActivity()).attemptAttachPhoto(true);
+            }
+        });
     }
 
     private void enableGalleryButton(View view) {
@@ -283,7 +289,6 @@ public class FragmentSignIn extends Fragment {
      * @param button the button to be reset throttling
      */
     private void resetSigninButtonThrottled(ImageButton button) {
-        // todo button.setText(getString(R.string.sign_in));
         button.setAlpha(1f);
         button.setEnabled(true);
     }
@@ -294,7 +299,6 @@ public class FragmentSignIn extends Fragment {
      * @param button the button to be throttled
      */
     private void setButtonThrottled(ImageButton button) {
-        // todo button.setText(getString(R.string.working));
         button.setAlpha(.5f);
         button.setEnabled(false);
     }
