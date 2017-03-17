@@ -100,7 +100,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     protected String mAddressOutput;
 
-    protected Uri photoImageUri;
+    protected Uri bulbImageUri;
 
     /**
      * Receiver registered with this activity to get the response from FetchAddressIntentService.
@@ -543,6 +543,11 @@ public class BaseActivity extends Activity implements ActivityCompat
         }
     }
 
+    protected void onDestroy() {
+        super.onDestroy();
+        deleteOldBulbImage();
+    }
+
     /**
      * Runs when a GoogleApiClient object successfully connects.
      */
@@ -685,9 +690,11 @@ public class BaseActivity extends Activity implements ActivityCompat
                 }
 
                 if (photo != null) {
-                    this.photoImageUri = FileProvider.getUriForFile(this, "com.example.android" +
+                    deleteOldBulbImage();
+
+                    this.bulbImageUri = FileProvider.getUriForFile(this, "com.example.android" +
                             ".fileprovider", photo);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoImageUri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, this.bulbImageUri);
 
                     startActivityForResult(intent, TAKE_IMAGE);
                 }
@@ -702,6 +709,17 @@ public class BaseActivity extends Activity implements ActivityCompat
     }
 
     /**
+     * Remove the image bulb file
+     */
+    private void deleteOldBulbImage() {
+        if (this.bulbImageUri != null) {
+            File oldImage = new File(this.bulbImageUri.getPath());
+
+            oldImage.delete();
+        }
+    }
+
+    /**
      * Create a local image file
      * todo remove all the local files
      *
@@ -710,7 +728,9 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     private File createImageFile() throws IOException {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
         File image = File.createTempFile("bulbImage", ".jpg", storageDir);
+        image.deleteOnExit();
 
         return image;
     }
@@ -736,10 +756,8 @@ public class BaseActivity extends Activity implements ActivityCompat
                 if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
                     uri = data.getData();
                 } else if (requestCode == TAKE_IMAGE) {
-                    uri = this.photoImageUri;
+                    uri = this.bulbImageUri;
                 }
-
-                Log.d(TAG, "uri is " + uri.toString());
 
                 if (uri != null) {
                     try {
