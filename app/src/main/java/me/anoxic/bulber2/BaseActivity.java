@@ -28,7 +28,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -249,6 +248,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      * @param bulb The bulb to be published
      */
     public void attemptPublishBulb(final String bulb) {
+        // todo clear the image anyways
         // Try to find the bulb folder
         if (storageManager.getBulbFolderID() != null) {
             publishBulbOnFolder(bulb);
@@ -631,11 +631,25 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     public void attemptAttachPhoto(boolean isCamera) {
 
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
+        if (isCamera) {
+        } else {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
+            startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
+        }
+    }
+
+    /**
+     * Removes any attached photo
+     */
+    public void removeAttachPhoto() {
+        // Clean the UI
+        ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+        imageView.setImageBitmap(null);
+
+        storageManager.clearBulbImage();
     }
 
     @Override
@@ -653,7 +667,11 @@ public class BaseActivity extends Activity implements ActivityCompat
 
                 ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
                 imageView.setImageBitmap(bitmap);
+
+                storageManager.setBulbImage(uri);
             } catch (IOException e) {
+                Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast.LENGTH_SHORT)
+                        .show();
                 e.printStackTrace();
             }
         }

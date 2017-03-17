@@ -8,6 +8,7 @@
         android:id="@+id/bulbImage"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:alpha=".5"
         android:scaleType="centerCrop"/>
 
     <LinearLayout
@@ -69,7 +70,6 @@
                     android:singleLine="true"
                     />
 
-                <!--todo make this work-->
                 <ImageButton
                     android:id="@+id/locationRefresh"
                     android:layout_width="40dp"

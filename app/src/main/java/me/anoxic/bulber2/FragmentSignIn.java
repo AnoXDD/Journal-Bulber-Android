@@ -2,6 +2,7 @@ package me.anoxic.bulber2;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -44,10 +45,23 @@ public class FragmentSignIn extends Fragment {
         enableUndoButton(view);
         enableLocationCheckbox(view);
         enableLocationAddressTextMonitor(view);
+        enableRefreshLocation(view);
         enableGalleryButton(view);
         enableCameraButton(view);
 
         return view;
+    }
+
+    private void enableRefreshLocation(final View view) {
+        final ImageButton button = (ImageButton) view.findViewById(R.id.locationRefresh);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearLocationResult(view);
+                retreiveAndSetLocationResult((BaseActivity) getActivity(), view);
+            }
+        });
     }
 
     private void enableCameraButton(View view) {
@@ -56,13 +70,20 @@ public class FragmentSignIn extends Fragment {
     }
 
     private void enableGalleryButton(View view) {
-        // todo implement this
         final ImageButton button = (ImageButton) view.findViewById(R.id.gallery);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((BaseActivity) getActivity()).attemptAttachPhoto(false);
+            }
+        });
+
+        button.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ((BaseActivity) getActivity()).removeAttachPhoto();
+                return true;
             }
         });
     }
@@ -118,16 +139,24 @@ public class FragmentSignIn extends Fragment {
                 baseActivity.setLocationAppend(!wasOn);
                 locationBox.setVisibility(wasOn ? View.GONE : View.VISIBLE);
                 if (!wasOn) {
-                    // Retrieve the current location when checked
-                    baseActivity.promptCurrentLocation();
-                    // Try to fetch the data
-                    baseActivity.fetchAddressButtonHandler(view);
+                    retreiveAndSetLocationResult(baseActivity, view);
                 } else {
-                    ((EditText) view.findViewById(R.id.locationAddress)).setText("");
+                    clearLocationResult(view);
                 }
 
             }
         });
+    }
+
+    private void clearLocationResult(View view) {
+        ((EditText) view.findViewById(R.id.locationAddress)).setText("");
+    }
+
+    private void retreiveAndSetLocationResult(BaseActivity baseActivity, View view) {
+        // Retrieve the current location when checked
+        baseActivity.promptCurrentLocation();
+        // Try to fetch the data
+        baseActivity.fetchAddressButtonHandler(view);
     }
 
     private void enableUndoButton(View view) {

@@ -2,6 +2,7 @@ package me.anoxic.bulber2;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 /**
  * This class manages the storage of everything needed
@@ -69,6 +70,24 @@ public class StorageManager {
     public void clearLastPushedBulbID() {
         sharedPreferences.edit()
                 .remove(context.getString(R.string.bulb_last_pushed_id))
+                .apply();
+    }
+
+    public Uri getBulbImage() {
+        String string = sharedPreferences.getString(context.getString(R.string.bulb_image_uri),
+                null);
+        return string == null ? null : Uri.parse(string);
+    }
+
+    public void setBulbImage(Uri uri) {
+        sharedPreferences.edit()
+                .putString(context.getString(R.string.bulb_image_uri), uri.toString())
+                .apply();
+    }
+
+    public void clearBulbImage() {
+        sharedPreferences.edit()
+                .remove(context.getString(R.string.bulb_image_uri))
                 .apply();
     }
 
