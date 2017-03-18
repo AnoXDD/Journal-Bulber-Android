@@ -48,8 +48,11 @@ import com.onedrive.sdk.extensions.Item;
 import com.onedrive.sdk.extensions.OneDriveClient;
 import com.onedrive.sdk.logger.LoggerLevel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -301,8 +304,8 @@ public class BaseActivity extends Activity implements ActivityCompat
                         @Override
                         public void failure(ClientException ex) {
                             ex.printStackTrace();
-                            Toast.makeText(getApplicationContext(), "Unable to get the bulb " +
-                                    "folder", Toast.LENGTH_LONG)
+                            Toast.makeText(getApplicationContext(), R.string
+                                    .get_buld_folder_fail, Toast.LENGTH_LONG)
                                     .show();
                         }
                     });
@@ -331,20 +334,11 @@ public class BaseActivity extends Activity implements ActivityCompat
             }
 
             public void success(final Item item) {
-                Snackbar.make(getCurrentFocus(), getString(R.string.bulb_pushed), Snackbar
-                        .LENGTH_LONG)
-                        .show();
-
-                // Clear the field
-                final EditText editText = (EditText) findViewById(R.id.bulbContent);
-                editText.setText("");
-
-                // Store the last pushed data
-                storageManager.setLastPushedBulbID(item.id);
-
-                // Enable the undo button
-                final ImageButton button = (ImageButton) findViewById(R.id.undo);
-                button.setEnabled(true);
+                if (storageManager.getBulbImageUri() != null) {
+                    publishBulbImageOnFolder(item);
+                } else {
+                    onFinishUploadingBulb(item);
+                }
             }
 
             @Override
@@ -367,6 +361,74 @@ public class BaseActivity extends Activity implements ActivityCompat
                 .getContent()
                 .buildRequest()
                 .put(fileContents, callback);
+    }
+
+    /**
+     * Publish the bulb image
+     *
+     * @param item - the item of the bulb content that just uploaded
+     */
+    private void publishBulbImageOnFolder(final Item item) {
+        if (storageManager.getBulbImageUri() == null) {
+            return;
+        }
+
+        String id = storageManager.getBulbFolderID();
+
+        String filename = item.name + getBulbImageSuffix();
+        byte[] imageContents = null;
+        try {
+            imageContents = getBulbImageByteArray();
+        } catch (IOException e) {
+            Log.d(TAG, "Unable to find the image or an error occurred while reading the image");
+            e.printStackTrace();
+        }
+        final IProgressCallback<Item> callback = new IProgressCallback<Item>() {
+            @Override
+            public void progress(long current, long max) {
+                // todo add a progress bar at the bottom
+            }
+
+            @Override
+            public void success(Item imageItem) {
+                storageManager.clearBulbImageUri();
+                onFinishUploadingBulb(item);
+            }
+
+            @Override
+            public void failure(ClientException ex) {
+                // TODO : try to re-upload or do something about this image
+                // Created by Anoxic 031817
+            }
+        };
+
+        this.getOneDriveClient()
+                .getDrive()
+                .getItems(id)
+                .getChildren()
+                .byId(filename)
+                .getContent()
+                .buildRequest()
+                .put(imageContents, callback);
+
+
+    }
+
+    private void onFinishUploadingBulb(Item item) {
+        // todo change the layout of buttons to show it's pushed
+        Snackbar.make(getCurrentFocus(), getString(R.string.bulb_pushed), Snackbar.LENGTH_LONG)
+                .show();
+
+        // Clear the field
+        final EditText editText = (EditText) findViewById(R.id.bulbContent);
+        editText.setText("");
+
+        // Store the last pushed data
+        storageManager.setLastPushedBulbID(item.id);
+
+        // Enable the undo button
+        final ImageButton button = (ImageButton) findViewById(R.id.undo);
+        button.setEnabled(true);
     }
 
     public void attemptRemoveLastPushedBulb() {
@@ -743,7 +805,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
         imageView.setImageBitmap(null);
 
-        storageManager.clearBulbImage();
+        storageManager.clearBulbImageUri();
     }
 
     @Override
@@ -767,7 +829,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                         ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
                         imageView.setImageBitmap(bitmap);
 
-                        storageManager.setBulbImage(uri);
+                        storageManager.setBulbImageUri(uri);
                     } catch (IOException e) {
                         Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
                                 .LENGTH_SHORT)
@@ -777,6 +839,32 @@ public class BaseActivity extends Activity implements ActivityCompat
                 }
             }
         }
+    }
+
+    public String getBulbImageSuffix() {
+        String imageUri = storageManager.getBulbImageUri()
+                .toString();
+
+        return imageUri.substring(imageUri.lastIndexOf(".") + 1);
+    }
+
+    public byte[] getBulbImageByteArray() throws IOException {
+        Uri uri = storageManager.getBulbImageUri();
+        InputStream iStream = getContentResolver().openInputStream(uri);
+
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        int len = 0;
+        try {
+        while ((len = iStream.read(buffer)) != 1) {
+            byteBuffer.write(buffer, 0, len);
+        }}catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return byteBuffer.toByteArray();
     }
 
     /**

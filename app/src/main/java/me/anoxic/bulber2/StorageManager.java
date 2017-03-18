@@ -73,19 +73,19 @@ public class StorageManager {
                 .apply();
     }
 
-    public Uri getBulbImage() {
+    public Uri getBulbImageUri() {
         String string = sharedPreferences.getString(context.getString(R.string.bulb_image_uri),
                 null);
         return string == null ? null : Uri.parse(string);
     }
 
-    public void setBulbImage(Uri uri) {
+    public void setBulbImageUri(Uri uri) {
         sharedPreferences.edit()
                 .putString(context.getString(R.string.bulb_image_uri), uri.toString())
                 .apply();
     }
 
-    public void clearBulbImage() {
+    public void clearBulbImageUri() {
         sharedPreferences.edit()
                 .remove(context.getString(R.string.bulb_image_uri))
                 .apply();
