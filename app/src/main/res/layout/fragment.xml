@@ -21,19 +21,19 @@
                 android:id="@+id/bulbImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_cast_dark"
                 android:scaleType="centerCrop"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:paddingBottom="30dp"
+                android:paddingBottom="10dp"
                 android:paddingLeft="50dp"
                 android:paddingRight="50dp"
                 android:paddingTop="50dp">
 
                 <EditText
+                    android:paddingBottom="20dp"
                     android:id="@+id/bulbContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
