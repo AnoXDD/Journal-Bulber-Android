@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Geocoder;
 import android.location.Location;
@@ -58,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.security.AccessController.getContext;
+
 
 public class BaseActivity extends Activity implements ActivityCompat
         .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
@@ -69,17 +72,24 @@ public class BaseActivity extends Activity implements ActivityCompat
     protected static final String ADDRESS_REQUESTED_KEY = "address-request-pending";
     protected static final String LOCATION_ADDRESS_KEY = "location-address";
 
-    private static final int TAKE_IMAGE = 0;
+    private static final int CAPTURE_IMAGE = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int PICK_LATEST_IMAGE_REQUEST = 2;
 
     /**
      * Constants for the reasons why the last pushed bulb should be removed
      */
-    private static final int INITIATED_BY_USER = 0;
-    private static final int IMAGE_PUBLISH_FAILURE = 1;
+    static final int INITIATED_BY_USER = 0;
+    static final int IMAGE_PUBLISH_FAILURE = 1;
+
+    /**
+     * Constants for the sources of the photo
+     */
+    static final int FROM_CAMERA = 0;
+    static final int FROM_GALLERY = 1;
+    static final int FROM_LATEST_OF_GALLERY = 2;
 
     private static final long ANIMATION_DURATION = 400L;
-    private static final long ANIMATION_DURATION_LONG = 1000L;
 
     /**
      * The service instance
@@ -828,46 +838,54 @@ public class BaseActivity extends Activity implements ActivityCompat
     /**
      * Attempts to attach a photo to this bulb
      *
-     * @param isCamera - if the camera should be invoked
+     * @param source - the source of the photo
      */
-    public void attemptAttachPhoto(boolean isCamera) {
+    public void attemptAttachPhoto(int source) {
 
-        if (isCamera) {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            // Make sure there is something to handle this intent
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                File photo = null;
-                try {
-                    photo = createImageFile();
-                } catch (IOException e) {
-                    Toast.makeText(BaseActivity.this, R.string.create_local_image_fail, Toast
-                            .LENGTH_SHORT)
-                            .show();
-                    e.printStackTrace();
+        switch (source) {
+            case FROM_CAMERA:
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Make sure there is something to handle this intent
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    File photo = null;
+                    try {
+                        photo = createImageFile();
+                    } catch (IOException e) {
+                        Toast.makeText(BaseActivity.this, R.string.create_local_image_fail, Toast
+                                .LENGTH_SHORT)
+                                .show();
+                        e.printStackTrace();
+                    }
+
+                    if (photo != null) {
+                        deleteOldBulbImage();
+
+                        storageManager.setBulbImageUri(FileProvider.getUriForFile(this, "com" +
+                                "" + ".example.android.fileprovider", photo));
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, storageManager.getBulbImageUri());
+
+                        startActivityForResult(intent, CAPTURE_IMAGE);
+                    }
                 }
+                break;
 
-                if (photo != null) {
-                    deleteOldBulbImage();
+            case FROM_GALLERY:
+                intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
 
-                    storageManager.setBulbImageUri(FileProvider.getUriForFile(this, "com.example"
-                            + ".android.fileprovider", photo));
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, storageManager.getBulbImageUri());
+                startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
+                break;
 
-                    startActivityForResult(intent, TAKE_IMAGE);
-                }
-            }
-        } else {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-
-            startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
+            case FROM_LATEST_OF_GALLERY:
+                this.onActivityResult(PICK_LATEST_IMAGE_REQUEST, RESULT_OK, null);
         }
     }
 
     /**
      * Remove the image bulb file
      */
+
     private void deleteOldBulbImage() {
         if (storageManager.getBulbImageUri() != null) {
             File oldImage = new File(storageManager.getBulbImageUri()
@@ -932,32 +950,69 @@ public class BaseActivity extends Activity implements ActivityCompat
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == PICK_IMAGE_REQUEST || requestCode == TAKE_IMAGE) {
+            if (requestCode == PICK_IMAGE_REQUEST || requestCode == CAPTURE_IMAGE) {
                 Uri uri = null;
                 if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
                     uri = data.getData();
-                } else if (requestCode == TAKE_IMAGE) {
+                } else if (requestCode == CAPTURE_IMAGE) {
                     uri = storageManager.getBulbImageUri();
                 }
 
                 if (uri != null) {
-                    try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),
-                                uri);
-
-                        ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
-                        imageView.setImageBitmap(bitmap);
-
-                        storageManager.setBulbImageUri(uri);
-                        fadeInBulbImageView();
-                    } catch (IOException e) {
-                        Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
-                                .LENGTH_SHORT)
-                                .show();
-                        e.printStackTrace();
-                    }
+                    displayInBulbImageView(uri);
+                }
+            } else if (requestCode == PICK_LATEST_IMAGE_REQUEST) {
+                Uri uri = getLatestImageUriInDevice();
+                if (uri != null) {
+                    displayInBulbImageView(uri);
                 }
             }
+        }
+    }
+
+    /**
+     * Searches the device and return the latest image from the cellphone
+     */
+    private Uri getLatestImageUriInDevice() {
+        String[] projection = new String[]{MediaStore.Images.ImageColumns._ID, MediaStore.Images
+                .ImageColumns.DATA, MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, //the
+                // album it in
+                MediaStore.Images.ImageColumns.DATE_TAKEN, MediaStore.Images.ImageColumns
+                .MIME_TYPE};
+        final Cursor cursor = getContentResolver().query(MediaStore.Images.Media
+                .EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.ImageColumns
+                .DATE_TAKEN + " DESC");
+
+        // Put it in the image view
+        if (cursor.moveToFirst()) {
+            String imageLocation = cursor.getString(1);
+            cursor.close();
+
+            return Uri.fromFile(new File(imageLocation));
+        }
+
+        cursor.close();
+        return null;
+    }
+
+    /**
+     * Displays an image in the bulb image view given a URI
+     *
+     * @param uri - the URI of the image
+     */
+    private void displayInBulbImageView(@NonNull Uri uri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+
+            ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+            imageView.setImageBitmap(bitmap);
+
+            storageManager.setBulbImageUri(uri);
+            fadeInBulbImageView();
+        } catch (IOException e) {
+            Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast.LENGTH_SHORT)
+                    .show();
+            e.printStackTrace();
         }
     }
 

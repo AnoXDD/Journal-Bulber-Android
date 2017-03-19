@@ -4,15 +4,19 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.onedrive.sdk.concurrency.ICallback;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Anoxic on 061516.
@@ -47,9 +51,21 @@ public class FragmentSignIn extends Fragment {
         enableRefreshLocation(view);
         enableGalleryButton(view);
         enableCameraButton(view);
+        enableRemovePhotoOnClickImageView(view);
         enableShiftFocusOnClickContentBox(view);
 
         return view;
+    }
+
+    private void enableRemovePhotoOnClickImageView(View view) {
+        final ImageView imageView = (ImageView) view.findViewById(R.id.bulbImage);
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((BaseActivity) getActivity()).removeAttachPhoto();
+            }
+        });
     }
 
     private void enableShiftFocusOnClickContentBox(final View view) {
@@ -81,7 +97,7 @@ public class FragmentSignIn extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BaseActivity) getActivity()).attemptAttachPhoto(true);
+                ((BaseActivity) getActivity()).attemptAttachPhoto(BaseActivity.FROM_CAMERA);
             }
         });
     }
@@ -92,14 +108,15 @@ public class FragmentSignIn extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BaseActivity) getActivity()).attemptAttachPhoto(false);
+                ((BaseActivity) getActivity()).attemptAttachPhoto(BaseActivity.FROM_GALLERY);
             }
         });
 
         button.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                ((BaseActivity) getActivity()).removeAttachPhoto();
+                ((BaseActivity) getActivity()).attemptAttachPhoto(BaseActivity
+                        .FROM_LATEST_OF_GALLERY);
                 return true;
             }
         });
