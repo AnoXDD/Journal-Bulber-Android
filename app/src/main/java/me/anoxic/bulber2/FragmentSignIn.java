@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.onedrive.sdk.concurrency.ICallback;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Anoxic on 061516.

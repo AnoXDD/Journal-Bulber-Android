@@ -26,6 +26,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
@@ -55,8 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static android.content.ContentValues.TAG;
-
 
 public class BaseActivity extends Activity implements ActivityCompat
         .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
@@ -76,6 +77,9 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     private static final int INITIATED_BY_USER = 0;
     private static final int IMAGE_PUBLISH_FAILURE = 1;
+
+    private static final long ANIMATION_DURATION = 400L;
+    private static final long ANIMATION_DURATION_LONG = 1000L;
 
     /**
      * The service instance
@@ -859,7 +863,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
         }
-     }
+    }
 
     /**
      * Remove the image bulb file
@@ -893,11 +897,34 @@ public class BaseActivity extends Activity implements ActivityCompat
      * Removes any attached photo and cleans the image view
      */
     public void removeAttachPhoto() {
-        // Clean the UI
-        ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
-        imageView.setImageBitmap(null);
+        clearBulbImageView();
 
         storageManager.clearBulbImageUri();
+    }
+
+    private void clearBulbImageView() {
+        final ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(ANIMATION_DURATION);
+
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                imageView.setImageBitmap(null);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        imageView.startAnimation(fadeOut);
     }
 
     @Override
@@ -922,6 +949,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                         imageView.setImageBitmap(bitmap);
 
                         storageManager.setBulbImageUri(uri);
+                        fadeInBulbImageView();
                     } catch (IOException e) {
                         Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
                                 .LENGTH_SHORT)
@@ -931,6 +959,19 @@ public class BaseActivity extends Activity implements ActivityCompat
                 }
             }
         }
+    }
+
+    /**
+     * Create a fadein view for the image
+     */
+    private void fadeInBulbImageView() {
+        ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
+
+        Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new AccelerateInterpolator());
+        fadeIn.setDuration(ANIMATION_DURATION);
+
+        imageView.startAnimation(fadeIn);
     }
 
     /**
