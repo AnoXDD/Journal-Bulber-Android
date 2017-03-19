@@ -289,7 +289,6 @@ public class FragmentSignIn extends Fragment {
      * @param button the button to be reset throttling
      */
     private void resetSigninButtonThrottled(ImageButton button) {
-        button.setAlpha(1f);
         button.setEnabled(true);
     }
 
@@ -299,7 +298,6 @@ public class FragmentSignIn extends Fragment {
      * @param button the button to be throttled
      */
     private void setButtonThrottled(ImageButton button) {
-        button.setAlpha(.5f);
         button.setEnabled(false);
     }
 

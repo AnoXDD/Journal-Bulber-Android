@@ -73,6 +73,23 @@ public class StorageManager {
                 .apply();
     }
 
+    public String getLastPushedBulbImageID() {
+        return sharedPreferences.getString(context.getString(R.string.bulb_image_last_pushed_id),
+                null);
+    }
+
+    public void setLastPushedBulbImageID(String id) {
+        sharedPreferences.edit()
+                .putString(context.getString(R.string.bulb_image_last_pushed_id), id)
+                .apply();
+    }
+
+    public void clearLastPushedBulbImageID() {
+        sharedPreferences.edit()
+                .remove(context.getString(R.string.bulb_image_last_pushed_id))
+                .apply();
+    }
+
     public Uri getBulbImageUri() {
         String string = sharedPreferences.getString(context.getString(R.string.bulb_image_uri),
                 null);
