@@ -27,6 +27,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -431,6 +432,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         // Clear the field
         final EditText editText = (EditText) findViewById(R.id.bulbContent);
         editText.setText("");
+        removeAttachPhoto();
 
         // Store the last pushed data
         storageManager.setLastPushedBulbID(item.id);
@@ -873,7 +875,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     }
 
     /**
-     * Removes any attached photo
+     * Removes any attached photo and cleans the image view
      */
     public void removeAttachPhoto() {
         // Clean the UI
@@ -916,11 +918,15 @@ public class BaseActivity extends Activity implements ActivityCompat
         }
     }
 
+    /**
+     * Gets the bulb image suffix
+     *
+     * @return the suffix of the bulb image, with a dot (i.e. `.jpg` or `.png`)
+     */
     public String getBulbImageSuffix() {
-        String imageUri = storageManager.getBulbImageUri()
-                .toString();
-
-        return imageUri.substring(imageUri.lastIndexOf(".") + 1);
+        Uri imageUri = storageManager.getBulbImageUri();
+        return "." + MimeTypeMap.getSingleton()
+                .getExtensionFromMimeType(getContentResolver().getType(imageUri));
     }
 
     public byte[] getBulbImageByteArray() throws IOException {
@@ -932,12 +938,8 @@ public class BaseActivity extends Activity implements ActivityCompat
         byte[] buffer = new byte[bufferSize];
 
         int len = 0;
-        try {
-            while ((len = iStream.read(buffer)) != 1) {
-                byteBuffer.write(buffer, 0, len);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        while ((len = iStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
         }
 
         return byteBuffer.toByteArray();
