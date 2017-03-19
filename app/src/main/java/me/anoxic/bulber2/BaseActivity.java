@@ -36,6 +36,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -131,6 +132,8 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     private AddressResultReceiver mResultReceiver;
 
+    private ProgressBar progressBar;
+
     /**
      * What to do when the application starts
      */
@@ -159,6 +162,9 @@ public class BaseActivity extends Activity implements ActivityCompat
 
         // Set the version number
         setVersionNumber();
+
+        // Find the right component
+        progressBar = (ProgressBar) findViewById(R.id.bulbProgress);
     }
 
     private void setVersionNumber() {
@@ -411,6 +417,7 @@ public class BaseActivity extends Activity implements ActivityCompat
             @Override
             public void progress(long current, long max) {
                 // todo add a progress bar at the bottom
+                Log.d(TAG, current + "/" + max);
             }
 
             @Override
