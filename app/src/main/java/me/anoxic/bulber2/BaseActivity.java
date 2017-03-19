@@ -859,7 +859,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             startActivityForResult(Intent.createChooser(intent, "Select"), PICK_IMAGE_REQUEST);
         }
-    }
+     }
 
     /**
      * Remove the image bulb file
