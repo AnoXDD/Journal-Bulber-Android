@@ -2,6 +2,7 @@ package me.anoxic.bulber2;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -1036,8 +1037,21 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     public String getBulbImageSuffix() {
         Uri imageUri = storageManager.getBulbImageUri();
-        return "." + MimeTypeMap.getSingleton()
-                .getExtensionFromMimeType(getContentResolver().getType(imageUri));
+        String extension = null;
+
+        // Check the format of the URI
+        if (imageUri.getScheme()
+                .equals(ContentResolver.SCHEME_CONTENT)) {
+            extension = MimeTypeMap.getSingleton()
+                    .getExtensionFromMimeType(getContentResolver().getType(imageUri));
+        } else {
+            // The scheme is a file
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(imageUri
+                    .getPath()))
+                    .toString());
+        }
+
+        return extension == null ? ".jpg" : ("." + extension);
     }
 
     public byte[] getBulbImageByteArray() throws IOException {
