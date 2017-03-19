@@ -172,11 +172,10 @@
         </RelativeLayout>
     </RelativeLayout>
 
-    <!--todo set the progress box height equal to buttonBox on show-->
     <LinearLayout
         android:id="@+id/progressBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:animateLayoutChanges="true"
@@ -190,14 +189,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="fdsasfd"/>
+            android:textSize="20sp"/>
 
         <ProgressBar
             android:id="@+id/bulbProgress"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:progress="33"/>
+            android:progress="0"/>
 
 
     </LinearLayout>

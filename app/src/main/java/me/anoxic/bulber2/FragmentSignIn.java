@@ -304,6 +304,8 @@ public class FragmentSignIn extends Fragment {
             }
         };
 
+        app.showProgressBar();
+
         try {
             app.getOneDriveClient();
             onTokenRefreshed(bulb);
@@ -337,17 +339,10 @@ public class FragmentSignIn extends Fragment {
      * @param bulb The content of bulb. Leave it `null` to not publish anything
      */
     private void onTokenRefreshed(String bulb) {
-        //        Toast.makeText(getContext(), "Signed in", Toast.LENGTH_SHORT)
-        // .show();
-        if (bulb != null) {
-            Toast.makeText(getContext(), getContext().getString(R.string.bulb_push_progress),
-                    Toast.LENGTH_LONG)
-                    .show();
-        }
-
         final BaseActivity app = (BaseActivity) getActivity();
         bulb = addTagsToBulb(bulb);
 
+        app.setProgressBarProgressTo(BaseActivity.SIGNED_IN);
         app.attemptPublishBulb(bulb);
     }
 

@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
@@ -28,6 +29,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -36,7 +38,10 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -60,8 +65,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static java.security.AccessController.getContext;
 
 
 public class BaseActivity extends Activity implements ActivityCompat
@@ -91,7 +94,18 @@ public class BaseActivity extends Activity implements ActivityCompat
     static final int FROM_GALLERY = 1;
     static final int FROM_LATEST_OF_GALLERY = 2;
 
+    /**
+     * Constants for the progress of the life of publishing a bulb, out of 100
+     */
+    static final int PROGRESS_FULL = 100;
+    static final int START = 0;
+    static final int SIGNED_IN = 20;
+    static final int BULB_TEXT = 40;
+    static final int BULB_IMAGE_START = 41;
+
     private static final long ANIMATION_DURATION = 400L;
+
+    private static final long PROGRESS_BOX_DURATION_AFTER_DONE = 1000L;
 
     /**
      * The service instance
@@ -133,6 +147,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     private AddressResultReceiver mResultReceiver;
 
     private ProgressBar progressBar;
+    private TextView progressStatus;
 
     /**
      * What to do when the application starts
@@ -165,6 +180,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
         // Find the right component
         progressBar = (ProgressBar) findViewById(R.id.bulbProgress);
+        progressStatus = (TextView) findViewById(R.id.bulbStatus);
     }
 
     private void setVersionNumber() {
@@ -330,9 +346,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                         @Override
                         public void failure(ClientException ex) {
                             ex.printStackTrace();
-                            Toast.makeText(getApplicationContext(), R.string
-                                    .get_buld_folder_fail, Toast.LENGTH_LONG)
-                                    .show();
+                            setProgressBarError(getString(R.string.get_buld_folder_fail));
                         }
                     });
         }
@@ -346,6 +360,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     private void publishBulbOnFolder(final String bulb) {
         if (bulb == null) {
+            hideProgressBar();
             return;
         }
 
@@ -360,6 +375,7 @@ public class BaseActivity extends Activity implements ActivityCompat
             }
 
             public void success(final Item item) {
+                setProgressBarProgressTo(BULB_TEXT);
                 if (storageManager.getBulbImageUri() != null) {
                     publishBulbImageOnFolder(item);
                 } else {
@@ -394,11 +410,10 @@ public class BaseActivity extends Activity implements ActivityCompat
      * Publish the bulb image
      *
      * @param item - the item of the bulb content that just uploaded
+     * @require storageManager.getBulbImageUri() != null
      */
     private void publishBulbImageOnFolder(final Item item) {
-        if (storageManager.getBulbImageUri() == null) {
-            return;
-        }
+        setProgressBarProgressTo(BULB_IMAGE_START);
 
         storageManager.setLastPushedBulbID(item.id);
 
@@ -416,8 +431,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         final IProgressCallback<Item> callback = new IProgressCallback<Item>() {
             @Override
             public void progress(long current, long max) {
-                // todo add a progress bar at the bottom
-                Log.d(TAG, current + "/" + max);
+                setProgressBarImageProgressTo((float) current / max);
             }
 
             @Override
@@ -450,8 +464,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
     private void onFinishUploadingBulb(Item item) {
         // todo change the layout of buttons to show it's pushed
-        Snackbar.make(getCurrentFocus(), getString(R.string.bulb_pushed), Snackbar.LENGTH_LONG)
-                .show();
+        setProgressBarProgressTo(PROGRESS_FULL);
 
         // Clear the field
         final EditText editText = (EditText) findViewById(R.id.bulbContent);
@@ -931,9 +944,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     private void clearBulbImageView() {
         final ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
 
-        Animation fadeOut = new AlphaAnimation(1, 0);
-        fadeOut.setInterpolator(new AccelerateInterpolator());
-        fadeOut.setDuration(ANIMATION_DURATION);
+        Animation fadeOut = createFadeOutAnimation();
 
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -1030,11 +1041,23 @@ public class BaseActivity extends Activity implements ActivityCompat
     private void fadeInBulbImageView() {
         ImageView imageView = (ImageView) findViewById(R.id.bulbImage);
 
+        imageView.startAnimation(createFadeInAnimation());
+    }
+
+    private Animation createFadeInAnimation() {
         Animation fadeIn = new AlphaAnimation(0, 1);
         fadeIn.setInterpolator(new AccelerateInterpolator());
         fadeIn.setDuration(ANIMATION_DURATION);
 
-        imageView.startAnimation(fadeIn);
+        return fadeIn;
+    }
+
+    private Animation createFadeOutAnimation() {
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(ANIMATION_DURATION);
+
+        return fadeOut;
     }
 
     /**
@@ -1075,6 +1098,99 @@ public class BaseActivity extends Activity implements ActivityCompat
         }
 
         return byteBuffer.toByteArray();
+    }
+
+    public void showProgressBar() {
+        LinearLayout progressBox = (LinearLayout) findViewById(R.id.progressBox);
+        RelativeLayout buttonBox = (RelativeLayout) findViewById(R.id.buttonBox);
+
+        // Initialize the progress bar
+        ViewGroup.LayoutParams layoutParams = progressBox.getLayoutParams();
+        layoutParams.height = buttonBox.getHeight();
+        progressBox.setLayoutParams(layoutParams);
+
+        progressBar.setVisibility(View.VISIBLE);
+        setProgressBarProgressTo(START);
+
+        progressBox.startAnimation(createFadeInAnimation());
+    }
+
+    public void setProgressBarProgressTo(int progress) {
+        // todo add animation here for sign_in and bulb_content and FULL_PROGRESS
+        progressBar.setProgress(progress);
+
+        switch (progress) {
+            case START:
+                progressStatus.setText(R.string.bulb_status_start);
+                break;
+            case SIGNED_IN:
+                progressStatus.setText(R.string.bulb_status_pushing_bulb);
+                break;
+            case BULB_TEXT:
+                progressStatus.setText(R.string.bulb_status_bulb_pushed);
+                break;
+            case BULB_IMAGE_START:
+                progressStatus.setText(R.string.bulb_status_pushing_image);
+                break;
+            case PROGRESS_FULL:
+                progressStatus.setText(R.string.bulb_status_finished);
+                getCurrentFocus().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        hideProgressBar();
+                    }
+                }, PROGRESS_BOX_DURATION_AFTER_DONE);
+        }
+    }
+
+    /**
+     * Sets the progress bar to finish a certain percent of image uploading. This function simply
+     * sets the progress bar and will not change the progress status
+     *
+     * @param percent - the percent of image progress
+     */
+    public void setProgressBarImageProgressTo(float percent) {
+        progressBar.setProgress((int) (BULB_IMAGE_START + percent * (PROGRESS_FULL -
+                BULB_IMAGE_START)));
+    }
+
+    public void setProgressBarError(String error) {
+        // todo change the color of progress status using xml
+        progressStatus.setText(error);
+
+        // Add a one time click listener of the progress box
+        final LinearLayout progressBox = (LinearLayout) findViewById(R.id.progressBox);
+        progressBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideProgressBar();
+
+                // Remove this listener
+                progressBox.setOnClickListener(null);
+            }
+        });
+    }
+
+    public void hideProgressBar() {
+        final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.progressBox);
+
+        Animation fadeOut = createFadeOutAnimation();
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                linearLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        linearLayout.startAnimation(fadeOut);
     }
 
     /**
