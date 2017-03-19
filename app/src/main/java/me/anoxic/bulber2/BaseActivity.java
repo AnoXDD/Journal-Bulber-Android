@@ -55,9 +55,8 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-public class BaseActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback,
-        ConnectionCallbacks,
-        OnConnectionFailedListener {
+public class BaseActivity extends Activity implements ActivityCompat
+        .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int REQUEST_FINE_LOCATION = 0;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
@@ -68,6 +67,12 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
     private static final int TAKE_IMAGE = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    /**
+     * Constants for the reasons why the last pushed bulb should be removed
+     */
+    private static final int INITIATED_BY_USER = 0;
+    private static final int IMAGE_PUBLISH_FAILURE = 1;
 
     /**
      * The service instance
@@ -102,8 +107,6 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      * The formatted location address.
      */
     protected String mAddressOutput;
-
-    protected Uri bulbImageUri;
 
     /**
      * Receiver registered with this activity to get the response from FetchAddressIntentService.
@@ -169,12 +172,12 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     private void requestWriteExternalStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .WRITE_EXTERNAL_STORAGE)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
@@ -183,20 +186,19 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             } else {
 
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        REQUEST_WRITE_EXTERNAL_STORAGE);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
             }
         }
     }
 
     private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .ACCESS_FINE_LOCATION)) {
 
                 // Show an expanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
@@ -205,9 +207,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             } else {
 
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        REQUEST_FINE_LOCATION);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                        .ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
             }
         }
     }
@@ -230,7 +231,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
             @Override
             public String[] getScopes() {
-                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl.offline_access"};
+                return new String[]{"onedrive.readwrite", "onedrive.appfolder", "wl" + "" + "" +
+                        ".offline_access"};
             }
         };
 
@@ -258,10 +260,10 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      * @param activity       the current activity
      * @param serviceCreated the callback
      */
-    synchronized void createOneDriveClient(final Activity activity,
-                                           final ICallback<Void> serviceCreated) {
-        final DefaultCallback<IOneDriveClient> callback = new DefaultCallback<IOneDriveClient>(
-                activity) {
+    synchronized void createOneDriveClient(final Activity activity, final ICallback<Void>
+            serviceCreated) {
+        final DefaultCallback<IOneDriveClient> callback = new DefaultCallback<IOneDriveClient>
+                (activity) {
             @Override
             public void success(final IOneDriveClient result) {
                 mClient.set(result);
@@ -304,9 +306,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                         @Override
                         public void failure(ClientException ex) {
                             ex.printStackTrace();
-                            Toast.makeText(getApplicationContext(),
-                                    R.string.get_buld_folder_fail,
-                                    Toast.LENGTH_LONG)
+                            Toast.makeText(getApplicationContext(), R.string
+                                    .get_buld_folder_fail, Toast.LENGTH_LONG)
                                     .show();
                         }
                     });
@@ -345,9 +346,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
             @Override
             public void failure(ClientException ex) {
-                Snackbar.make(getCurrentFocus(),
-                        getString(R.string.bulb_push_failed),
-                        Snackbar.LENGTH_LONG)
+                Snackbar.make(getCurrentFocus(), getString(R.string.bulb_push_failed), Snackbar
+                        .LENGTH_LONG)
                         .show();
             }
         };
@@ -376,6 +376,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             return;
         }
 
+        storageManager.setLastPushedBulbID(item.id);
+
         String id = storageManager.getBulbFolderID();
 
         String filename = item.name + getBulbImageSuffix();
@@ -386,6 +388,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
             Log.d(TAG, "Unable to find the image or an error occurred while reading the image");
             e.printStackTrace();
         }
+
         final IProgressCallback<Item> callback = new IProgressCallback<Item>() {
             @Override
             public void progress(long current, long max) {
@@ -404,9 +407,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
             @Override
             public void failure(ClientException ex) {
-                attemptRemoveLastPushedBulb(false);
-
-                // Created by Anoxic 031817
+                attemptRemoveLastPushedBulb(IMAGE_PUBLISH_FAILURE);
             }
         };
 
@@ -443,15 +444,15 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      * Attempts to remove the last pushed bulb
      */
     public void attemptRemoveLastPushedBulb() {
-        attemptRemoveLastPushedBulb(true);
+        attemptRemoveLastPushedBulb(INITIATED_BY_USER);
     }
 
     /**
      * Attempts to remove the last pushed bulb
      *
-     * @param isShowingMessage - whether the message should be shown. This will be set to false when the bulb is uploaded successfully but the image isn't
+     * @param reason - the reason why this last pushed bulb should be removed
      */
-    public void attemptRemoveLastPushedBulb(final boolean isShowingMessage) {
+    public void attemptRemoveLastPushedBulb(final int reason) {
         // Try to get the id of last pushed bulb
         String id = storageManager.getLastPushedBulbID();
         final String imageId = storageManager.getLastPushedBulbImageID();
@@ -462,8 +463,12 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                 @Override
                 public void success(Void aVoid) {
                     // Only show this if told to do so and no more images are to be loaded
-                    if (isShowingMessage && imageId == null) {
+                    if (reason == INITIATED_BY_USER && imageId == null) {
                         onFinishSucessfullyRemovingLastPushedBulb();
+                    } else if (reason == IMAGE_PUBLISH_FAILURE) {
+                        Toast.makeText(BaseActivity.this, R.string.publish_bulb_image_fail, Toast
+                                .LENGTH_SHORT)
+                                .show();
                     }
 
                     // Remove the id
@@ -481,10 +486,15 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
                 @Override
                 public void failure(ClientException ex) {
-                    Toast.makeText(getApplicationContext(),
-                            getString(R.string.bulb_remove_last_pushed_fail),
-                            Toast.LENGTH_SHORT)
-                            .show();
+                    if (reason == INITIATED_BY_USER) {
+                        Toast.makeText(getApplicationContext(), getString(R.string
+                                .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
+                                .show();
+                    } else if (reason == IMAGE_PUBLISH_FAILURE) {
+                        Toast.makeText(BaseActivity.this, R.string
+                                .publish_bulb_image_partial_fail, Toast.LENGTH_SHORT)
+                                .show();
+                    }
 
                     ex.printStackTrace();
                 }
@@ -499,9 +509,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         } else if (imageId != null) {
             attemptRemoveLastPushedBulbImage();
         } else {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.bulb_remove_last_pushed_fail),
-                    Toast.LENGTH_SHORT)
+            Toast.makeText(getApplicationContext(), getString(R.string
+                    .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
                     .show();
 
             final ImageButton button = (ImageButton) findViewById(R.id.undo);
@@ -510,8 +519,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     private void onFinishSucessfullyRemovingLastPushedBulb() {
-        Snackbar.make(getCurrentFocus(),
-                getString(R.string.bulb_remove_last_pushed_success),
+        Snackbar.make(getCurrentFocus(), getString(R.string.bulb_remove_last_pushed_success),
                 Snackbar.LENGTH_LONG)
                 .show();
     }
@@ -534,9 +542,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
                     @Override
                     public void failure(ClientException ex) {
-                        Toast.makeText(BaseActivity.this,
-                                R.string.bulb_remove_last_pushed_image_fail,
-                                Toast.LENGTH_SHORT)
+                        Toast.makeText(BaseActivity.this, R.string
+                                .bulb_remove_last_pushed_image_fail, Toast.LENGTH_SHORT)
                                 .show();
 
                         ex.printStackTrace();
@@ -549,7 +556,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     public void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context
+                .INPUT_METHOD_SERVICE);
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
@@ -560,23 +568,22 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
         // Prompt location
         String string = locationManager.getFormattedLocation();
-        Toast.makeText(getApplicationContext(),
-                String.format(getString(R.string.bulb_prompt_current_location), string),
-                Toast.LENGTH_SHORT)
+        Toast.makeText(getApplicationContext(), String.format(getString(R.string
+                .bulb_prompt_current_location), string), Toast.LENGTH_SHORT)
                 .show();
     }
 
     private void updateCurrentLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context
+                .LOCATION_SERVICE);
 
         // Get the last know location from your location manager.
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                getApplicationContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.bulb_location_request_fail),
-                    Toast.LENGTH_SHORT)
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission
+                .ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
+                .checkSelfPermission(getApplicationContext(), Manifest.permission
+                        .ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), getString(R.string
+                    .bulb_location_request_fail), Toast.LENGTH_SHORT)
                     .show();
 
             return;
@@ -586,13 +593,13 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         this.locationManager.setLocation(location);
     }
 
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_FINE_LOCATION:
                 // Check if the only required permission has been granted
-                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length == 1 && grantResults[0] == PackageManager
+                        .PERMISSION_GRANTED) {
                     // Location permission has been granted, preview can be displayed
                 /* Toast.makeText(getApplicationContext(), R.string.bulb_location_request_granted,
                         Toast.LENGTH_SHORT)
@@ -601,8 +608,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
                     Log.d(TAG, getString(R.string.bulb_location_request_granted));
                 } else {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.bulb_location_request_fail,
+                    Toast.makeText(getApplicationContext(), R.string.bulb_location_request_fail,
                             Toast.LENGTH_SHORT)
                             .show();
                 }
@@ -685,9 +691,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
     public void onConnected(Bundle connectionHint) {
         // Gets the best and most recent location currently available, which may be null
         // in rare cases when a location is not available.
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -722,8 +727,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         intent.putExtra(FetchAddressIntentService.Constants.RECEIVER, mResultReceiver);
 
         // Pass the location data as an extra to the service.
-        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA,
-                locationManager.getLocation());
+        intent.putExtra(FetchAddressIntentService.Constants.LOCATION_DATA_EXTRA, locationManager
+                .getLocation());
 
         // Start the service. If the service isn't already running, it is instantiated and started
         // (creating a process for it if needed); if it is running then it remains running. The
@@ -775,8 +780,10 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         final ImageButton imageButton = (ImageButton) findViewById(R.id.isAppendLocation);
         System.out.println(isOn);
         // If it is on, we want the user to look at it as if it can be turned off
-        imageButton.setImageResource(isOn ? R.drawable.ic_location_off_black : R.drawable.ic_location_on_black);
-        imageButton.setTag(isOn ? R.drawable.ic_location_off_black : R.drawable.ic_location_on_black);
+        imageButton.setImageResource(isOn ? R.drawable.ic_location_off_black : R.drawable
+                .ic_location_on_black);
+        imageButton.setTag(isOn ? R.drawable.ic_location_off_black : R.drawable
+                .ic_location_on_black);
     }
 
     /**
@@ -812,9 +819,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                 try {
                     photo = createImageFile();
                 } catch (IOException e) {
-                    Toast.makeText(BaseActivity.this,
-                            R.string.create_local_image_fail,
-                            Toast.LENGTH_SHORT)
+                    Toast.makeText(BaseActivity.this, R.string.create_local_image_fail, Toast
+                            .LENGTH_SHORT)
                             .show();
                     e.printStackTrace();
                 }
@@ -822,10 +828,9 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                 if (photo != null) {
                     deleteOldBulbImage();
 
-                    this.bulbImageUri = FileProvider.getUriForFile(this,
-                            "com.example.android" + ".fileprovider",
-                            photo);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, this.bulbImageUri);
+                    storageManager.setBulbImageUri(FileProvider.getUriForFile(this, "com.example"
+                            + ".android.fileprovider", photo));
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, storageManager.getBulbImageUri());
 
                     startActivityForResult(intent, TAKE_IMAGE);
                 }
@@ -843,8 +848,9 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
      * Remove the image bulb file
      */
     private void deleteOldBulbImage() {
-        if (this.bulbImageUri != null) {
-            File oldImage = new File(this.bulbImageUri.getPath());
+        if (storageManager.getBulbImageUri() != null) {
+            File oldImage = new File(storageManager.getBulbImageUri()
+                    .getPath());
 
             oldImage.delete();
         }
@@ -887,7 +893,7 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
                 if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
                     uri = data.getData();
                 } else if (requestCode == TAKE_IMAGE) {
-                    uri = this.bulbImageUri;
+                    uri = storageManager.getBulbImageUri();
                 }
 
                 if (uri != null) {
@@ -900,9 +906,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
 
                         storageManager.setBulbImageUri(uri);
                     } catch (IOException e) {
-                        Toast.makeText(BaseActivity.this,
-                                R.string.select_photo_fail,
-                                Toast.LENGTH_SHORT)
+                        Toast.makeText(BaseActivity.this, R.string.select_photo_fail, Toast
+                                .LENGTH_SHORT)
                                 .show();
                         e.printStackTrace();
                     }
@@ -953,7 +958,8 @@ public class BaseActivity extends Activity implements ActivityCompat.OnRequestPe
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
             // Display the address string or an error message sent from the intent service.
-            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants.RESULT_DATA_KEY);
+            mAddressOutput = resultData.getString(FetchAddressIntentService.Constants
+                    .RESULT_DATA_KEY);
             displayAddressOutput();
 
             // Show a toast message if an address was found.
