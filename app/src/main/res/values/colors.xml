@@ -6,4 +6,5 @@
     <color name="button_pressed">#cccccc</color>
     <color name="action_bar_background">#ffffff</color>
     <color name="transparent">#00000000</color>
+    <color name="colorGray">#cccccc</color>
 </resources>

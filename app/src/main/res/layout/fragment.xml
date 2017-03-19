@@ -10,17 +10,19 @@
         android:layout_above="@+id/buttonBox">
 
         <LinearLayout
+            android:id="@+id/contentBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
+            android:clickable="true"
             android:orientation="vertical"
             android:weightSum="1">
 
             <ImageView
-                android:adjustViewBounds="true"
                 android:id="@+id/bulbImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:scaleType="centerCrop"/>
 
             <LinearLayout
@@ -33,13 +35,13 @@
                 android:paddingTop="50dp">
 
                 <EditText
-                    android:paddingBottom="20dp"
                     android:id="@+id/bulbContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/transparent"
                     android:gravity="top"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:paddingBottom="20dp"
                     />
             </LinearLayout>
 
@@ -106,27 +108,29 @@
 
             <ImageButton
                 android:id="@+id/push"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/round_corner_accent"
-                android:enabled="false"
                 android:src="@drawable/ic_send_white"/>
 
             <ImageButton
                 android:id="@+id/signin"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_account_box_black"
-                />
+                android:src="@drawable/ic_account_box_black"/>
 
             <ImageButton
                 android:id="@+id/undo"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:layout_toRightOf="@id/signin"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_undo_black"/>
@@ -135,17 +139,20 @@
                 android:id="@+id/isAppendLocation"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@id/push"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:enabled="true"
                 android:src="@drawable/ic_location_on_black"
-                android:tag="@drawable/ic_location_on_black"
-                />
+                android:tag="@drawable/ic_location_on_black"/>
 
             <ImageButton
                 android:id="@+id/camera"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@id/isAppendLocation"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_photo_camera_black"/>
@@ -154,6 +161,8 @@
                 android:id="@+id/gallery"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@id/camera"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_menu_gallery"/>

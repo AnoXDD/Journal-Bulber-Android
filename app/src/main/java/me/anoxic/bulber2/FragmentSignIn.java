@@ -2,9 +2,9 @@ package me.anoxic.bulber2;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.onedrive.sdk.concurrency.ICallback;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Anoxic on 061516.
@@ -48,8 +50,20 @@ public class FragmentSignIn extends Fragment {
         enableRefreshLocation(view);
         enableGalleryButton(view);
         enableCameraButton(view);
+        enableShiftFocusOnClickContentBox(view);
 
         return view;
+    }
+
+    private void enableShiftFocusOnClickContentBox(final View view) {
+        final LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.contentBox);
+
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((BaseActivity) getActivity()).setFocusOnBulbContent();
+            }
+        });
     }
 
     private void enableRefreshLocation(final View view) {
@@ -207,6 +221,8 @@ public class FragmentSignIn extends Fragment {
         final ImageButton push = (ImageButton) view.findViewById(R.id.push);
         final EditText bulbContent = (EditText) view.findViewById(R.id.bulbContent);
         final ImageButton signin = (ImageButton) view.findViewById(R.id.signin);
+
+        push.setEnabled(false);
 
         push.setOnClickListener(new View.OnClickListener() {
 

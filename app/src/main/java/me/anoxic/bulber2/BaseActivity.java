@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static android.content.ContentValues.TAG;
+
 
 public class BaseActivity extends Activity implements ActivityCompat
         .OnRequestPermissionsResultCallback, ConnectionCallbacks, OnConnectionFailedListener {
@@ -555,6 +557,19 @@ public class BaseActivity extends Activity implements ActivityCompat
 
     public MyLocationManager getLocationManager() {
         return locationManager;
+    }
+
+    /**
+     * Shifts the focus to the bulb content and show the keyboard
+     */
+    public void setFocusOnBulbContent() {
+        EditText text = (EditText) findViewById(R.id.bulbContent);
+
+        if (text.requestFocus()) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context
+                    .INPUT_METHOD_SERVICE);
+            inputMethodManager.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     public void hideKeyboard() {
