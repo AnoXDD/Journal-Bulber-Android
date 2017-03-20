@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
+import android.support.v4.animation.AnimatorCompatHelper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
@@ -104,8 +106,9 @@ public class BaseActivity extends Activity implements ActivityCompat
     static final int BULB_IMAGE_START = 41;
 
     private static final long ANIMATION_DURATION = 400L;
+    private static final long ANIMATION_DURATION_LONG = 1000L;
 
-    private static final long PROGRESS_BOX_DURATION_AFTER_DONE = 1000L;
+    private static final long PROGRESS_BOX_DURATION_AFTER_DONE = 3000L;
 
     /**
      * The service instance
@@ -1053,9 +1056,13 @@ public class BaseActivity extends Activity implements ActivityCompat
     }
 
     private Animation createFadeOutAnimation() {
+        return createFadeOutAnimation(ANIMATION_DURATION);
+    }
+
+    private Animation createFadeOutAnimation(long duration) {
         Animation fadeOut = new AlphaAnimation(1, 0);
         fadeOut.setInterpolator(new AccelerateInterpolator());
-        fadeOut.setDuration(ANIMATION_DURATION);
+        fadeOut.setDuration(duration);
 
         return fadeOut;
     }
@@ -1105,11 +1112,12 @@ public class BaseActivity extends Activity implements ActivityCompat
         RelativeLayout buttonBox = (RelativeLayout) findViewById(R.id.buttonBox);
 
         // Initialize the progress bar
+        progressBox.setVisibility(View.VISIBLE);
+
         ViewGroup.LayoutParams layoutParams = progressBox.getLayoutParams();
         layoutParams.height = buttonBox.getHeight();
         progressBox.setLayoutParams(layoutParams);
 
-        progressBar.setVisibility(View.VISIBLE);
         setProgressBarProgressTo(START);
 
         progressBox.startAnimation(createFadeInAnimation());
@@ -1117,7 +1125,11 @@ public class BaseActivity extends Activity implements ActivityCompat
 
     public void setProgressBarProgressTo(int progress) {
         // todo add animation here for sign_in and bulb_content and FULL_PROGRESS
-        progressBar.setProgress(progress);
+        // Set animation
+        int from = progressBar.getProgress();
+        ProgressBarAnimation ani = new ProgressBarAnimation(from, progress);
+        ani.setDuration(ANIMATION_DURATION);
+        progressBar.startAnimation(ani);
 
         switch (progress) {
             case START:
@@ -1174,7 +1186,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     public void hideProgressBar() {
         final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.progressBox);
 
-        Animation fadeOut = createFadeOutAnimation();
+        Animation fadeOut = createFadeOutAnimation(ANIMATION_DURATION_LONG);
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -1191,6 +1203,22 @@ public class BaseActivity extends Activity implements ActivityCompat
         });
 
         linearLayout.startAnimation(fadeOut);
+    }
+
+    class ProgressBarAnimation extends Animation {
+        private float from;
+        private float to;
+
+        public ProgressBarAnimation(float from, float to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            super.applyTransformation(interpolatedTime, t);
+            progressBar.setProgress((int) (from + (to - from) * interpolatedTime));
+        }
     }
 
     /**
