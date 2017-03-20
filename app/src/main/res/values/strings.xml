@@ -8,7 +8,6 @@
     <string name="action_settings">Hi</string>
     <string name="bulb_last_pushed_id">lastPushed</string>
     <string name="bulb_remove_last_pushed_fail">Lost track of last pushed bulb. Please try again.</string>
-    <string name="bulb_remove_last_pushed_success">Removed last pushed bulb</string>
     <string name="working">Working...</string>
     <string name="sign_in">Sign In</string>
     <string name="is_append_location">Location</string>
@@ -38,4 +37,5 @@
     <string name="bulb_status_pushing_image">Pushing image …</string>
     <string name="bulb_status_finished">Done!</string>
     <string name="publish_bulb_image_fail">Unable to publish the bulb. Please try again</string>
+    <string name="bulb_remove_last_pushed_success">Removed last pushed bulb</string>
 </resources>

@@ -386,11 +386,15 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             @Override
             public void failure(ClientException ex) {
-                setProgressBarError(String.valueOf(R.string.bulb_push_failed));
+                setProgressBarError(getString(R.string.bulb_push_failed));
             }
         };
 
         if (storageManager.isDebugging()) {
+            Toast.makeText(this, bulb, Toast.LENGTH_LONG)
+                    .show();
+
+            setProgressBarProgressTo(PROGRESS_FULL);
             return;
         }
 
@@ -527,9 +531,9 @@ public class BaseActivity extends Activity implements ActivityCompat
                 @Override
                 public void failure(ClientException ex) {
                     if (reason == INITIATED_BY_USER) {
-                        setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
+                        setProgressBarError(getString(R.string.bulb_remove_last_pushed_fail));
                     } else if (reason == IMAGE_PUBLISH_FAILURE) {
-                        setProgressBarError(String.valueOf(R.string
+                        setProgressBarError(getString(R.string
                                 .publish_bulb_image_partial_fail));
                     }
 
@@ -546,7 +550,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         } else if (imageId != null) {
             attemptRemoveLastPushedBulbImage();
         } else {
-            setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
+            setProgressBarError(getString(R.string.bulb_remove_last_pushed_fail));
 
             final ImageButton button = (ImageButton) findViewById(R.id.undo);
             button.setEnabled(false);
@@ -554,7 +558,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     }
 
     private void onFinishRemovingLastPushedBulbSuccess() {
-        showNotificationOnBulbProgress(String.valueOf(R.string.bulb_remove_last_pushed_success));
+        showNotificationOnBulbProgress(getString(R.string.bulb_remove_last_pushed_success));
     }
 
     /**
@@ -577,7 +581,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
                     @Override
                     public void failure(ClientException ex) {
-                        setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
+                        setProgressBarError(getString(R.string.bulb_remove_last_pushed_fail));
 
                         ex.printStackTrace();
                     }
@@ -615,9 +619,10 @@ public class BaseActivity extends Activity implements ActivityCompat
         // Prompt location
         String string = locationManager.getFormattedLocation();
 
-//        Toast.makeText(getApplicationContext(), R.string.bulb_prompt_current_location, Toast
-//                .LENGTH_SHORT)
-//                .show();
+        //        Toast.makeText(getApplicationContext(), R.string.bulb_prompt_current_location,
+        // Toast
+        //                .LENGTH_SHORT)
+        //                .show();
     }
 
     private void updateCurrentLocation() {
@@ -863,7 +868,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                     try {
                         photo = createImageFile();
                     } catch (IOException e) {
-                        setProgressBarError(String.valueOf(R.string.create_local_image_fail));
+                        setProgressBarError(getString(R.string.create_local_image_fail));
 
                         e.printStackTrace();
                     }
