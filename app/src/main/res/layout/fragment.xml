@@ -189,13 +189,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="20sp"/>
+            android:paddingTop="@dimen/progress_bar_height"
+            android:textSize="15sp"/>
 
         <ProgressBar
             android:id="@+id/bulbProgress"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="@dimen/progress_bar_height"
             android:progress="0"/>
 
 
