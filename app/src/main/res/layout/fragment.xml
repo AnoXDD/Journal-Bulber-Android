@@ -64,13 +64,6 @@
         android:paddingRight="20dp"
         android:paddingTop="10dp">
 
-        <RelativeLayout
-            android:id="@+id/pushBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true">
-        </RelativeLayout>
-
         <LinearLayout
             android:id="@+id/locationBox"
             android:layout_width="match_parent"
@@ -125,6 +118,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentTop="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:foreground="@drawable/image_button_foreground_regular"
                 android:src="@drawable/ic_account_box_black"/>
 
             <ImageButton
@@ -135,6 +129,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_toRightOf="@id/signin"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:foreground="@drawable/image_button_foreground_regular"
                 android:src="@drawable/ic_undo_black"/>
 
             <ImageButton
@@ -146,6 +141,8 @@
                 android:layout_toLeftOf="@id/push"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:enabled="true"
+
+                android:foreground="@drawable/image_button_foreground_regular"
                 android:src="@drawable/ic_location_on_black"
                 android:tag="@drawable/ic_location_on_black"/>
 
@@ -154,9 +151,11 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentBottom="true"
+
                 android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@id/isAppendLocation"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:foreground="@drawable/image_button_foreground_regular"
                 android:src="@drawable/ic_photo_camera_black"/>
 
             <ImageButton
@@ -167,6 +166,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_toLeftOf="@id/camera"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:foreground="@drawable/image_button_foreground_regular"
                 android:src="@drawable/ic_menu_gallery"/>
 
         </RelativeLayout>

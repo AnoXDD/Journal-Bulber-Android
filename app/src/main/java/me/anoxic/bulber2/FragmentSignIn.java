@@ -304,6 +304,8 @@ public class FragmentSignIn extends Fragment {
             }
         };
 
+        app.findViewById(R.id.push)
+                .setEnabled(false);
         app.showProgressBar();
 
         try {

@@ -21,10 +21,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
-import android.support.v4.animation.AnimatorCompatHelper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -363,7 +360,7 @@ public class BaseActivity extends Activity implements ActivityCompat
      */
     private void publishBulbOnFolder(final String bulb) {
         if (bulb == null) {
-            hideProgressBar();
+            hideProgressBox();
             return;
         }
 
@@ -389,9 +386,7 @@ public class BaseActivity extends Activity implements ActivityCompat
 
             @Override
             public void failure(ClientException ex) {
-                Snackbar.make(getCurrentFocus(), getString(R.string.bulb_push_failed), Snackbar
-                        .LENGTH_LONG)
-                        .show();
+                setProgressBarError(String.valueOf(R.string.bulb_push_failed));
             }
         };
 
@@ -465,6 +460,11 @@ public class BaseActivity extends Activity implements ActivityCompat
 
     }
 
+    /**
+     * The last function to call when a bulb has been uploaded
+     *
+     * @param item
+     */
     private void onFinishUploadingBulb(Item item) {
         // todo change the layout of buttons to show it's pushed
         setProgressBarProgressTo(PROGRESS_FULL);
@@ -477,9 +477,9 @@ public class BaseActivity extends Activity implements ActivityCompat
         // Store the last pushed data
         storageManager.setLastPushedBulbID(item.id);
 
-        // Enable the undo button
-        final ImageButton button = (ImageButton) findViewById(R.id.undo);
-        button.setEnabled(true);
+        // Enable/Disable some buttons
+        findViewById(R.id.undo).setEnabled(true);
+        findViewById(R.id.push).setEnabled(false);
     }
 
     /**
@@ -506,7 +506,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                 public void success(Void aVoid) {
                     // Only show this if told to do so and no more images are to be loaded
                     if (reason == INITIATED_BY_USER && imageId == null) {
-                        onFinishSucessfullyRemovingLastPushedBulb();
+                        onFinishRemovingLastPushedBulbSuccess();
                     } else if (reason == IMAGE_PUBLISH_FAILURE) {
                         setProgressBarError(getString(R.string.publish_bulb_image_fail));
                     }
@@ -527,9 +527,10 @@ public class BaseActivity extends Activity implements ActivityCompat
                 @Override
                 public void failure(ClientException ex) {
                     if (reason == INITIATED_BY_USER) {
-                        setProgressBarError(R.string.bulb_remove_last_pushed_fail);
+                        setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
                     } else if (reason == IMAGE_PUBLISH_FAILURE) {
-                        setProgressBarError(R.string.publish_bulb_image_partial_fail);
+                        setProgressBarError(String.valueOf(R.string
+                                .publish_bulb_image_partial_fail));
                     }
 
                     ex.printStackTrace();
@@ -545,17 +546,15 @@ public class BaseActivity extends Activity implements ActivityCompat
         } else if (imageId != null) {
             attemptRemoveLastPushedBulbImage();
         } else {
-            setProgressBarError(R.string.bulb_remove_last_pushed_fail);
+            setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
 
             final ImageButton button = (ImageButton) findViewById(R.id.undo);
             button.setEnabled(false);
         }
     }
 
-    private void onFinishSucessfullyRemovingLastPushedBulb() {
-        Snackbar.make(getCurrentFocus(), getString(R.string.bulb_remove_last_pushed_success),
-                Snackbar.LENGTH_LONG)
-                .show();
+    private void onFinishRemovingLastPushedBulbSuccess() {
+        showNotificationOnBulbProgress(String.valueOf(R.string.bulb_remove_last_pushed_success));
     }
 
     /**
@@ -571,14 +570,14 @@ public class BaseActivity extends Activity implements ActivityCompat
                 .delete(new ICallback<Void>() {
                     @Override
                     public void success(Void aVoid) {
-                        onFinishSucessfullyRemovingLastPushedBulb();
+                        storageManager.clearLastPushedBulbImageID();
+
+                        onFinishRemovingLastPushedBulbSuccess();
                     }
 
                     @Override
                     public void failure(ClientException ex) {
-                        Toast.makeText(BaseActivity.this, R.string
-                                .bulb_remove_last_pushed_image_fail, Toast.LENGTH_SHORT)
-                                .show();
+                        setProgressBarError(String.valueOf(R.string.bulb_remove_last_pushed_fail));
 
                         ex.printStackTrace();
                     }
@@ -615,16 +614,17 @@ public class BaseActivity extends Activity implements ActivityCompat
 
         // Prompt location
         String string = locationManager.getFormattedLocation();
-        Toast.makeText(getApplicationContext(), R.string
-                .bulb_prompt_current_location, Toast.LENGTH_SHORT)
-                .show();
+
+//        Toast.makeText(getApplicationContext(), R.string.bulb_prompt_current_location, Toast
+//                .LENGTH_SHORT)
+//                .show();
     }
 
     private void updateCurrentLocation() {
         LocationManager locationManager = (LocationManager) getSystemService(Context
                 .LOCATION_SERVICE);
 
-        // Get the last know location from your location manager.
+        // Get the last known location from your location manager.
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission
                 .ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
                 .checkSelfPermission(getApplicationContext(), Manifest.permission
@@ -863,7 +863,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                     try {
                         photo = createImageFile();
                     } catch (IOException e) {
-                        setProgressBarError(R.string.create_local_image_fail);
+                        setProgressBarError(String.valueOf(R.string.create_local_image_fail));
 
                         e.printStackTrace();
                     }
@@ -1111,7 +1111,6 @@ public class BaseActivity extends Activity implements ActivityCompat
     }
 
     public void setProgressBarProgressTo(int progress) {
-        // todo add animation here for sign_in and bulb_content and FULL_PROGRESS
         // Set animation
         int from = progressBar.getProgress();
         ProgressBarAnimation ani = new ProgressBarAnimation(from, progress);
@@ -1133,13 +1132,17 @@ public class BaseActivity extends Activity implements ActivityCompat
                 break;
             case PROGRESS_FULL:
                 progressStatus.setText(R.string.bulb_status_finished);
-                getCurrentFocus().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        hideProgressBar();
-                    }
-                }, PROGRESS_BOX_DURATION_AFTER_DONE);
+                hideProgressBoxDelayed();
         }
+    }
+
+    private void hideProgressBoxDelayed() {
+        getCurrentFocus().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideProgressBox();
+            }
+        }, PROGRESS_BOX_DURATION_AFTER_DONE);
     }
 
     /**
@@ -1156,13 +1159,15 @@ public class BaseActivity extends Activity implements ActivityCompat
     public void setProgressBarError(String error) {
         // todo change the color of progress status using xml
         progressStatus.setText(error);
+        progressBar.setProgress(0);
 
         // Add a one time click listener of the progress box
         final LinearLayout progressBox = (LinearLayout) findViewById(R.id.progressBox);
         progressBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hideProgressBar();
+                hideProgressBox();
+                findViewById(R.id.push).setEnabled(true);
 
                 // Remove this listener
                 progressBox.setOnClickListener(null);
@@ -1170,7 +1175,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         });
     }
 
-    public void hideProgressBar() {
+    public void hideProgressBox() {
         final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.progressBox);
 
         Animation fadeOut = createFadeOutAnimation(ANIMATION_DURATION_LONG);
@@ -1190,6 +1195,18 @@ public class BaseActivity extends Activity implements ActivityCompat
         });
 
         linearLayout.startAnimation(fadeOut);
+    }
+
+    /**
+     * Shows the bulb progress status for a while and then hide it
+     *
+     * @param info - the information to be shown
+     */
+    public void showNotificationOnBulbProgress(String info) {
+        showProgressBar();
+        progressStatus.setText(info);
+
+        hideProgressBoxDelayed();
     }
 
     class ProgressBarAnimation extends Animation {
