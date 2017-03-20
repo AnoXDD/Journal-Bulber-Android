@@ -31,11 +31,11 @@
     <string name="get_buld_folder_fail">Unable to get the bulb folder</string>
     <string name="bulb_remove_last_pushed_image_fail">Lost track of last pushed image. Please try again</string>
     <string name="bulb_image_last_pushed_id">lastPushedImage</string>
-    <string name="publish_bulb_image_fail">Unable to publish the bulb. Please try again</string>
     <string name="publish_bulb_image_partial_fail">The bulb content was uploaded, but the image wasn\'t. Please try again.</string>
     <string name="bulb_status_start">Signing in …</string>
     <string name="bulb_status_pushing_bulb">Pushing bulb …</string>
     <string name="bulb_status_bulb_pushed">Bulb text pushed</string>
     <string name="bulb_status_pushing_image">Pushing image …</string>
     <string name="bulb_status_finished">Done!</string>
+    <string name="publish_bulb_image_fail">Unable to publish the bulb. Please try again</string>
 </resources>

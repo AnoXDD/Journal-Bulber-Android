@@ -508,9 +508,7 @@ public class BaseActivity extends Activity implements ActivityCompat
                     if (reason == INITIATED_BY_USER && imageId == null) {
                         onFinishSucessfullyRemovingLastPushedBulb();
                     } else if (reason == IMAGE_PUBLISH_FAILURE) {
-                        Toast.makeText(BaseActivity.this, R.string.publish_bulb_image_fail, Toast
-                                .LENGTH_SHORT)
-                                .show();
+                        setProgressBarError(getString(R.string.publish_bulb_image_fail));
                     }
 
                     // Remove the id
@@ -529,13 +527,9 @@ public class BaseActivity extends Activity implements ActivityCompat
                 @Override
                 public void failure(ClientException ex) {
                     if (reason == INITIATED_BY_USER) {
-                        Toast.makeText(getApplicationContext(), getString(R.string
-                                .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
-                                .show();
+                        setProgressBarError(R.string.bulb_remove_last_pushed_fail);
                     } else if (reason == IMAGE_PUBLISH_FAILURE) {
-                        Toast.makeText(BaseActivity.this, R.string
-                                .publish_bulb_image_partial_fail, Toast.LENGTH_SHORT)
-                                .show();
+                        setProgressBarError(R.string.publish_bulb_image_partial_fail);
                     }
 
                     ex.printStackTrace();
@@ -551,9 +545,7 @@ public class BaseActivity extends Activity implements ActivityCompat
         } else if (imageId != null) {
             attemptRemoveLastPushedBulbImage();
         } else {
-            Toast.makeText(getApplicationContext(), getString(R.string
-                    .bulb_remove_last_pushed_fail), Toast.LENGTH_SHORT)
-                    .show();
+            setProgressBarError(R.string.bulb_remove_last_pushed_fail);
 
             final ImageButton button = (ImageButton) findViewById(R.id.undo);
             button.setEnabled(false);
@@ -623,8 +615,8 @@ public class BaseActivity extends Activity implements ActivityCompat
 
         // Prompt location
         String string = locationManager.getFormattedLocation();
-        Toast.makeText(getApplicationContext(), String.format(getString(R.string
-                .bulb_prompt_current_location), string), Toast.LENGTH_SHORT)
+        Toast.makeText(getApplicationContext(), R.string
+                .bulb_prompt_current_location, Toast.LENGTH_SHORT)
                 .show();
     }
 
@@ -656,10 +648,6 @@ public class BaseActivity extends Activity implements ActivityCompat
                 if (grantResults.length == 1 && grantResults[0] == PackageManager
                         .PERMISSION_GRANTED) {
                     // Location permission has been granted, preview can be displayed
-                /* Toast.makeText(getApplicationContext(), R.string.bulb_location_request_granted,
-                        Toast.LENGTH_SHORT)
-                        .show();
-                       */
 
                     Log.d(TAG, getString(R.string.bulb_location_request_granted));
                 } else {
@@ -875,9 +863,8 @@ public class BaseActivity extends Activity implements ActivityCompat
                     try {
                         photo = createImageFile();
                     } catch (IOException e) {
-                        Toast.makeText(BaseActivity.this, R.string.create_local_image_fail, Toast
-                                .LENGTH_SHORT)
-                                .show();
+                        setProgressBarError(R.string.create_local_image_fail);
+
                         e.printStackTrace();
                     }
 
