@@ -30,10 +30,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:paddingBottom="10dp"
                 android:paddingLeft="50dp"
                 android:paddingRight="50dp"
-                android:paddingTop="50dp">
+                android:paddingTop="40dp">
 
                 <EditText
                     android:id="@+id/bulbContent"
@@ -42,7 +41,7 @@
                     android:background="@color/transparent"
                     android:gravity="top"
                     android:inputType="textCapSentences|textMultiLine"
-                    android:paddingBottom="20dp"
+                    android:paddingBottom="40dp"
                     />
             </LinearLayout>
 
