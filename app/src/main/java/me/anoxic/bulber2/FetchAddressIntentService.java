@@ -125,7 +125,7 @@ public class FetchAddressIntentService extends IntentService {
             // getCountryCode() ("US", for example)
             // getCountryName() ("United States", for example)
 
-            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+            for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
 

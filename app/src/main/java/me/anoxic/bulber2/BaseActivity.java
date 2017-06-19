@@ -105,7 +105,7 @@ public class BaseActivity extends Activity implements ActivityCompat
     private static final long ANIMATION_DURATION = 400L;
     private static final long ANIMATION_DURATION_LONG = 1000L;
 
-    private static final long PROGRESS_BOX_DURATION_AFTER_DONE = 3000L;
+    private static final long PROGRESS_BOX_DURATION_AFTER_DONE = 1500L;
 
     /**
      * The service instance
@@ -181,6 +181,9 @@ public class BaseActivity extends Activity implements ActivityCompat
         // Find the right component
         progressBar = (ProgressBar) findViewById(R.id.bulbProgress);
         progressStatus = (TextView) findViewById(R.id.bulbStatus);
+
+        ImageButton imageButton = (ImageButton) findViewById(R.id.isAppendLocation);
+        imageButton.performClick();
     }
 
     private void setVersionNumber() {
@@ -332,7 +335,7 @@ public class BaseActivity extends Activity implements ActivityCompat
             // Find the bulb folder on OneDrive first
             getOneDriveClient().getDrive()
                     .getRoot()
-                    .getItemWithPath("/Apps/Journal/bulb")
+                    .getItemWithPath("/Apps/Trak/bulb")
                     .buildRequest()
                     .get(new ICallback<Item>() {
                         @Override
